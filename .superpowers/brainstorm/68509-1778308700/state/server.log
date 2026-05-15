@@ -1,0 +1,4 @@
+{"type":"server-started","port":61180,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:61180","screen_dir":"/Users/sivaprakasam/projects/agents/.superpowers/brainstorm/68509-1778308700/content","state_dir":"/Users/sivaprakasam/projects/agents/.superpowers/brainstorm/68509-1778308700/state"}
+{"type":"screen-added","file":"/Users/sivaprakasam/projects/agents/.superpowers/brainstorm/68509-1778308700/content/design-sources.html"}
+{"type":"screen-added","file":"/Users/sivaprakasam/projects/agents/.superpowers/brainstorm/68509-1778308700/content/design-rotation-map.html"}
+{"type":"server-stopped","reason":"idle timeout"}

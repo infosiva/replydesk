@@ -1,0 +1,31 @@
+{
+  "name": "aigotitwrong",
+  "version": "1.0.0",
+  "description": "Automated AI comedy YouTube Shorts pipeline",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "pipeline:run": "ts-node src/index.ts --run-now morning",
+    "youtube:setup": "ts-node src/utils/youtubeOauthSetup.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.30.0",
+    "@elevenlabs/elevenlabs-js": "^0.11.0",
+    "@google/generative-ai": "^0.21.0",
+    "fluent-ffmpeg": "^2.1.3",
+    "ffmpeg-static": "^5.2.0",
+    "googleapis": "^140.0.0",
+    "node-cron": "^3.0.3",
+    "winston": "^3.14.0",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0",
+    "ts-node": "^10.9.2",
+    "@types/node": "^22.0.0",
+    "@types/fluent-ffmpeg": "^2.1.27",
+    "@types/node-cron": "^3.0.11"
+  }
+}

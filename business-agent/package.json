@@ -1,0 +1,24 @@
+{
+  "name": "business-agent",
+  "version": "1.0.0",
+  "description": "Autonomous business operator — monetization improver + weekly product launcher",
+  "type": "module",
+  "scripts": {
+    "start": "node --import tsx/esm src/index.ts",
+    "dashboard": "node --import tsx/esm src/dashboard.ts",
+    "dev": "node --import tsx/esm src/index.ts",
+    "leads": "npx tsx src/leadFinder.ts",
+    "leads:apollo": "npx tsx src/apolloFinder.ts",
+    "send": "npx tsx src/emailSender.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "cheerio": "^1.2.0",
+    "dotenv": "^16.4.5",
+    "node-fetch": "^3.3.2",
+    "tsx": "^4.19.2"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.0"
+  }
+}

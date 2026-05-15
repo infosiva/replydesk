@@ -1,0 +1,40 @@
+<h2>Which design source strategy fits best?</h2>
+<p class="subtitle">We have 15+ projects. Different sources = different personalities. Pick the approach.</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Assign by project type</h3>
+      <p>Dashboards → Tremor/shadcn. Landing/games → Magic UI + Aceternity. Compliance/pro tools → shadcn clean. Each project gets the right tool for its personality.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>Purposeful variety</li><li>Best tool per job</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>More libraries to learn</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>One shared system, per-project themes</h3>
+      <p>shadcn/ui as base everywhere. Magic UI animations layered on top. Theme token per project (color, radius, font). Consistent but still distinct.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>One codebase pattern</li><li>Easy to maintain</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Less personality difference</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>3-tier pipeline: Stitch → Claude → Code</h3>
+      <p>Google Stitch generates wireframe → MCP exports it → Claude /design-html renders it → convert to React. Every project starts from a real wireframe, not guesswork.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>Most intentional designs</li><li>Fits Initiative #2</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Needs Stitch MCP built first</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,111 @@
+2026-04-07 23:47:03,810  INFO      __main__  🏸 Badminton Booking Bot starting…
+2026-04-07 23:47:03,867  INFO      apscheduler.scheduler  Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-04-07 23:47:03,868  INFO      apscheduler.scheduler  Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-04-07 23:47:03,868  INFO      apscheduler.scheduler  Added job "Tuesday 8AM — Send Approval Request" to job store "default"
+2026-04-07 23:47:03,868  INFO      apscheduler.scheduler  Added job "Tuesday 11:58PM — Run Booking" to job store "default"
+2026-04-07 23:47:03,868  INFO      apscheduler.scheduler  Scheduler started
+2026-04-07 23:47:03,868  INFO      __main__  Scheduler active:
+2026-04-07 23:47:03,868  INFO      __main__    • Tuesday 08:00 AM UK → Send Telegram approval
+2026-04-07 23:47:03,868  INFO      __main__    • Tuesday 11:58 PM UK → Book courts (if approved)
+2026-04-07 23:47:03,868  INFO      __main__  Telegram commands: /status  /approve  /booknow
+2026-04-07 23:47:03,939  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/getMe "HTTP/1.1 200 OK"
+2026-04-07 23:47:03,939  INFO      apscheduler.scheduler  Scheduler started
+2026-04-07 23:47:03,939  INFO      telegram.ext.Application  Application started
+2026-04-07 23:47:03,955  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/deleteWebhook "HTTP/1.1 200 OK"
+2026-04-07 23:47:04,011  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/getUpdates "HTTP/1.1 200 OK"
+2026-04-07 23:47:04,085  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/sendMessage "HTTP/1.1 200 OK"
+2026-04-07 23:47:14,033  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/getUpdates "HTTP/1.1 200 OK"
+2026-04-07 23:47:24,056  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/getUpdates "HTTP/1.1 200 OK"
+2026-04-07 23:47:49,213  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/getUpdates "HTTP/1.1 200 OK"
+2026-04-07 23:47:59,247  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/getUpdates "HTTP/1.1 200 OK"
+2026-04-07 23:48:14,320  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/getUpdates "HTTP/1.1 200 OK"
+2026-04-07 23:48:14,412  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/sendMessage "HTTP/1.1 200 OK"
+2026-04-07 23:48:14,413  INFO      __main__  Approval: YES received from user
+2026-04-07 23:48:24,418  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/getUpdates "HTTP/1.1 200 OK"
+2026-04-07 23:48:34,472  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/getUpdates "HTTP/1.1 200 OK"
+2026-04-07 23:48:59,563  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/getUpdates "HTTP/1.1 200 OK"
+2026-04-07 23:49:09,597  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/getUpdates "HTTP/1.1 200 OK"
+2026-04-07 23:49:34,686  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/getUpdates "HTTP/1.1 200 OK"
+2026-04-07 23:49:44,721  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/getUpdates "HTTP/1.1 200 OK"
+2026-04-07 23:50:09,802  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/getUpdates "HTTP/1.1 200 OK"
+2026-04-07 23:50:19,827  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/getUpdates "HTTP/1.1 200 OK"
+2026-04-07 23:50:44,898  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/getUpdates "HTTP/1.1 200 OK"
+2026-04-07 23:50:54,923  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/getUpdates "HTTP/1.1 200 OK"
+2026-04-07 23:51:20,009  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/getUpdates "HTTP/1.1 200 OK"
+2026-04-07 23:51:30,030  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/getUpdates "HTTP/1.1 200 OK"
+2026-04-07 23:51:55,180  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/getUpdates "HTTP/1.1 200 OK"
+2026-04-07 23:52:05,198  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/getUpdates "HTTP/1.1 200 OK"
+2026-04-07 23:52:30,272  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/getUpdates "HTTP/1.1 200 OK"
+2026-04-07 23:52:40,338  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/getUpdates "HTTP/1.1 200 OK"
+2026-04-07 23:53:05,425  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/getUpdates "HTTP/1.1 200 OK"
+2026-04-07 23:53:15,451  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/getUpdates "HTTP/1.1 200 OK"
+2026-04-07 23:53:40,550  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/getUpdates "HTTP/1.1 200 OK"
+2026-04-07 23:53:50,573  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/getUpdates "HTTP/1.1 200 OK"
+2026-04-07 23:54:15,636  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/getUpdates "HTTP/1.1 200 OK"
+2026-04-07 23:54:25,661  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/getUpdates "HTTP/1.1 200 OK"
+2026-04-07 23:54:50,734  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/getUpdates "HTTP/1.1 200 OK"
+2026-04-07 23:55:00,773  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/getUpdates "HTTP/1.1 200 OK"
+2026-04-07 23:55:25,886  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/getUpdates "HTTP/1.1 200 OK"
+2026-04-07 23:55:35,906  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/getUpdates "HTTP/1.1 200 OK"
+2026-04-07 23:56:00,982  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/getUpdates "HTTP/1.1 200 OK"
+2026-04-07 23:56:11,002  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/getUpdates "HTTP/1.1 200 OK"
+2026-04-07 23:56:36,083  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/getUpdates "HTTP/1.1 200 OK"
+2026-04-07 23:56:46,106  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/getUpdates "HTTP/1.1 200 OK"
+2026-04-07 23:57:11,188  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/getUpdates "HTTP/1.1 200 OK"
+2026-04-07 23:57:21,207  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/getUpdates "HTTP/1.1 200 OK"
+2026-04-07 23:57:46,311  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/getUpdates "HTTP/1.1 200 OK"
+2026-04-07 23:57:56,347  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/getUpdates "HTTP/1.1 200 OK"
+2026-04-07 23:58:00,000  INFO      apscheduler.executors.default  Running job "Tuesday 11:58PM — Run Booking (trigger: cron[day_of_week='tue', hour='23', minute='58'], next run at: 2026-04-14 23:58:00 BST)" (scheduled at 2026-04-07 23:58:00+01:00)
+2026-04-07 23:58:00,000  INFO      __main__  ⏰ Tuesday night job triggered
+2026-04-07 23:58:00,086  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/sendMessage "HTTP/1.1 200 OK"
+2026-04-07 23:58:00,087  INFO      booking  
+───────────────────────────────────────────────────────
+2026-04-07 23:58:00,087  INFO      booking    Booking slot: 20:00 – 21:00 on 2026-04-15
+2026-04-07 23:58:00,087  INFO      booking  ───────────────────────────────────────────────────────
+2026-04-07 23:58:04,316  ERROR     booking  Login error: Page.wait_for_timeout: Target page, context or browser has been closed
+2026-04-07 23:58:04,397  INFO      booking    ✗ Login failed
+2026-04-07 23:58:07,398  INFO      booking  
+───────────────────────────────────────────────────────
+2026-04-07 23:58:07,398  INFO      booking    Booking slot: 21:00 – 22:00 on 2026-04-15
+2026-04-07 23:58:07,398  INFO      booking  ───────────────────────────────────────────────────────
+2026-04-07 23:58:07,929  INFO      apscheduler.scheduler  Scheduler has been shut down
+2026-04-07 23:58:07,953  ERROR     apscheduler.executors.default  Job "Tuesday 11:58PM — Run Booking (trigger: cron[day_of_week='tue', hour='23', minute='58'], next run at: 2026-04-14 23:58:00 BST)" raised an exception
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/apscheduler/executors/base.py", line 181, in run_coroutine_job
+    retval = await job.func(*job.args, **job.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/sivaprakasam/projects/agents/badminton/scheduler.py", line 176, in job_tuesday_night
+    results = await bk.run_all_bookings(cfg)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/sivaprakasam/projects/agents/badminton/booking.py", line 440, in run_all_bookings
+  File "/Users/sivaprakasam/projects/agents/badminton/booking.py", line 377, in make_booking
+    # SINGLE BOOKING ORCHESTRATOR
+                   ^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/playwright/async_api/_generated.py", line 12880, in new_page
+    return mapping.from_impl(await self._impl_obj.new_page())
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/playwright/_impl/_browser_context.py", line 331, in new_page
+    return from_channel(await self._channel.send("newPage", None))
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/playwright/_impl/_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/playwright/_impl/_connection.py", line 557, in wrap_api_call
+    return await cb()
+           ^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/playwright/_impl/_connection.py", line 123, in _inner_send
+    done, _ = await asyncio.wait(
+              ^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/asyncio/tasks.py", line 464, in wait
+    return await _wait(fs, timeout, return_when, loop)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/asyncio/tasks.py", line 550, in _wait
+    await waiter
+asyncio.exceptions.CancelledError
+2026-04-07 23:58:07,987  INFO      httpx  HTTP Request: POST https://api.telegram.org/bot8211311635:AAFeqUzCieeXd_CWJ0B9YOszgTuX4RIuMmo/getUpdates "HTTP/1.1 200 OK"
+2026-04-07 23:58:07,988  INFO      telegram.ext.Application  Application is stopping. This might take a moment.
+2026-04-07 23:58:07,988  INFO      apscheduler.scheduler  Scheduler has been shut down
+2026-04-07 23:58:07,999  INFO      telegram.ext.Application  Application.stop() complete
+2026-04-07 23:58:08,010  ERROR     asyncio  Future exception was never retrieved
+future: <Future finished exception=TargetClosedError('Target page, context or browser has been closed')>
+playwright._impl._errors.TargetClosedError: Target page, context or browser has been closed

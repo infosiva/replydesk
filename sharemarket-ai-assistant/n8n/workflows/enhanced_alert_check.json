@@ -1,0 +1,157 @@
+{
+  "name": "Enhanced Stock Alert Check",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 5
+            }
+          ]
+        }
+      },
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://app:8000/api/v1/internal/check-alerts",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Webhook-Secret",
+              "value": "={{ $env.N8N_WEBHOOK_SECRET }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "name": "Check All Alerts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [470, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "1",
+              "leftValue": "={{ $json.triggered_alerts.length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "name": "Has Triggered Alerts?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [700, 300]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "triggered_alerts",
+        "options": {}
+      },
+      "name": "Split Alerts",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [920, 200]
+    },
+    {
+      "parameters": {
+        "url": "http://app:8000/api/v1/webhooks/n8n/enhanced-alert",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Webhook-Secret",
+              "value": "={{ $env.N8N_WEBHOOK_SECRET }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            { "name": "alert_id", "value": "={{ $json.alert_id }}" },
+            { "name": "user_id", "value": "={{ $json.user_id }}" },
+            { "name": "symbol", "value": "={{ $json.symbol }}" },
+            { "name": "alert_type", "value": "={{ $json.alert_type }}" },
+            { "name": "condition_met", "value": "={{ $json.condition_met }}" },
+            { "name": "current_value", "value": "={{ $json.current_value }}" },
+            { "name": "threshold", "value": "={{ $json.threshold }}" },
+            { "name": "notification_channels", "value": "={{ JSON.stringify($json.notification_channels) }}" }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Send Alert Notification",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1140, 200]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "status",
+              "value": "No alerts triggered"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Log No Alerts",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [920, 400]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [{ "node": "Check All Alerts", "type": "main", "index": 0 }]
+      ]
+    },
+    "Check All Alerts": {
+      "main": [
+        [{ "node": "Has Triggered Alerts?", "type": "main", "index": 0 }]
+      ]
+    },
+    "Has Triggered Alerts?": {
+      "main": [
+        [{ "node": "Split Alerts", "type": "main", "index": 0 }],
+        [{ "node": "Log No Alerts", "type": "main", "index": 0 }]
+      ]
+    },
+    "Split Alerts": {
+      "main": [
+        [{ "node": "Send Alert Notification", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

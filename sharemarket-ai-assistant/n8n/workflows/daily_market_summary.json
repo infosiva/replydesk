@@ -1,0 +1,75 @@
+{
+  "name": "Daily Market Summary",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 16,
+              "triggerAtMinute": 30
+            }
+          ]
+        }
+      },
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://host.docker.internal:8000/api/v1/market/price/AAPL",
+        "method": "GET",
+        "options": {}
+      },
+      "name": "Fetch AAPL Price",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [470, 200]
+    },
+    {
+      "parameters": {
+        "url": "http://host.docker.internal:8000/api/v1/market/price/MSFT",
+        "method": "GET",
+        "options": {}
+      },
+      "name": "Fetch MSFT Price",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [470, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "const aapl = $('Fetch AAPL Price').first().json;\nconst msft = $('Fetch MSFT Price').first().json;\n\nreturn [{\n  json: {\n    summary: `Daily Market Summary\\n\\nAAPL: $${aapl.price} (Vol: ${aapl.volume})\\nMSFT: $${msft.price} (Vol: ${msft.volume})`,\n    timestamp: new Date().toISOString()\n  }\n}];"
+      },
+      "name": "Build Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [700, 300]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          { "node": "Fetch AAPL Price", "type": "main", "index": 0 },
+          { "node": "Fetch MSFT Price", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Fetch AAPL Price": {
+      "main": [
+        [{ "node": "Build Summary", "type": "main", "index": 0 }]
+      ]
+    },
+    "Fetch MSFT Price": {
+      "main": [
+        [{ "node": "Build Summary", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

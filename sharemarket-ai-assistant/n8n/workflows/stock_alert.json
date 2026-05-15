@@ -1,0 +1,111 @@
+{
+  "name": "Stock Price Alert",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 15
+            }
+          ]
+        }
+      },
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://app:8000/api/v1/market/price/{{ $json.symbol }}",
+        "method": "GET",
+        "options": {}
+      },
+      "name": "Fetch Current Price",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [470, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "1",
+              "leftValue": "={{ $json.price }}",
+              "rightValue": "={{ $json.threshold }}",
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "name": "Check Threshold",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [700, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://app:8000/api/v1/webhooks/n8n/alert",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Webhook-Secret",
+              "value": "={{ $env.N8N_WEBHOOK_SECRET }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            { "name": "symbol", "value": "={{ $json.symbol }}" },
+            { "name": "price", "value": "={{ $json.price }}" },
+            { "name": "threshold", "value": "={{ $json.threshold }}" },
+            { "name": "direction", "value": "above" },
+            { "name": "message", "value": "Price alert triggered" }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Send Alert",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [920, 200]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [{ "node": "Fetch Current Price", "type": "main", "index": 0 }]
+      ]
+    },
+    "Fetch Current Price": {
+      "main": [
+        [{ "node": "Check Threshold", "type": "main", "index": 0 }]
+      ]
+    },
+    "Check Threshold": {
+      "main": [
+        [{ "node": "Send Alert", "type": "main", "index": 0 }],
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

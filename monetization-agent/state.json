@@ -1,0 +1,22 @@
+{
+  "lastRunAt": "2026-05-05T08:13:52.391Z",
+  "totalRuns": 2,
+  "history": [
+    {
+      "id": "run-1777968810059",
+      "startedAt": "2026-05-05T08:13:30.059Z",
+      "completedAt": "2026-05-05T08:13:52.391Z",
+      "status": "completed",
+      "sitesAnalysed": 13,
+      "outputFile": "2026-05-05-1777968832280"
+    },
+    {
+      "id": "run-1777910503902",
+      "startedAt": "2026-05-04T16:01:43.902Z",
+      "completedAt": "2026-05-04T16:02:05.021Z",
+      "status": "completed",
+      "sitesAnalysed": 13,
+      "outputFile": "2026-05-04-1777910524884"
+    }
+  ]
+}

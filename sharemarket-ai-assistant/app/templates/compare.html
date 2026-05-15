@@ -1,0 +1,281 @@
+{% extends "base.html" %}
+
+{% block title %}Compare Stocks - StockPulse{% endblock %}
+
+{% block content %}
+{% if error %}
+<div class="bg-red-900/50 border border-red-700 text-red-200 px-4 py-3 rounded mb-6">
+    {{ error }}
+</div>
+{% endif %}
+
+<!-- Comparison Header -->
+<section class="mb-8">
+    <h1 class="text-2xl font-bold text-white mb-4">Stock Comparison</h1>
+
+    <!-- Symbol Input -->
+    <form action="/dashboard/compare" method="get" class="flex flex-wrap gap-4 items-end">
+        <div class="flex-1 min-w-[300px]">
+            <label class="block text-sm text-[#6B6460] mb-1">Enter symbols (comma-separated, max 5)</label>
+            <input type="text" name="symbols" value="{{ symbols }}"
+                   placeholder="AAPL, MSFT, GOOGL"
+                   class="w-full bg-[#F4F0EB] border border-gray-600 rounded-lg px-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-[#D97757]">
+        </div>
+        <div>
+            <label class="block text-sm text-[#6B6460] mb-1">Period</label>
+            <select name="period" class="bg-[#F4F0EB] border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#D97757]">
+                {% for p in periods %}
+                <option value="{{ p }}" {% if p == current_period %}selected{% endif %}>{{ p }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="bg-[#D97757] hover:bg-[#C5653F] text-white px-6 py-2 rounded-lg font-medium transition">
+            Compare
+        </button>
+    </form>
+</section>
+
+{% if stocks %}
+<!-- Comparison Chart -->
+<section class="mb-8">
+    <div class="bg-white rounded-lg p-6 border border-[#E8E0D5]">
+        <h2 class="text-lg font-semibold text-[#1A1A18] mb-4">Performance Comparison (% Change)</h2>
+        <div class="h-80">
+            <canvas id="comparisonChart"></canvas>
+        </div>
+    </div>
+</section>
+
+<!-- Comparison Table -->
+<section class="mb-8">
+    <h2 class="text-lg font-semibold text-[#1A1A18] mb-4">Key Metrics</h2>
+    <div class="bg-white rounded-lg border border-[#E8E0D5] overflow-x-auto">
+        <table class="w-full min-w-[800px]">
+            <thead class="bg-[#F4F0EB]/50">
+                <tr>
+                    <th class="px-4 py-3 text-left text-sm text-[#6B6460] font-medium">Metric</th>
+                    {% for stock in stocks %}
+                    <th class="px-4 py-3 text-right text-sm text-white font-medium">
+                        {{ stock.symbol }}
+                        {% if stock.name and stock.name != stock.symbol %}
+                        <div class="text-xs text-[#6B6460] font-normal truncate max-w-[120px]">{{ stock.name }}</div>
+                        {% endif %}
+                    </th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-700">
+                <tr class="hover:bg-[#F4F0EB]/30">
+                    <td class="px-4 py-3 text-sm text-[#6B6460]">Price</td>
+                    {% for stock in stocks %}
+                    <td class="px-4 py-3 text-right text-white font-medium">
+                        {% if stock.price %}${{ "{:,.2f}".format(stock.price) }}{% else %}--{% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+                <tr class="hover:bg-[#F4F0EB]/30">
+                    <td class="px-4 py-3 text-sm text-[#6B6460]">Market Cap</td>
+                    {% for stock in stocks %}
+                    <td class="px-4 py-3 text-right text-[#1A1A18]">
+                        {% if stock.market_cap %}
+                            {% if stock.market_cap >= 1000000000000 %}
+                                ${{ "{:.2f}".format(stock.market_cap / 1000000000000) }}T
+                            {% elif stock.market_cap >= 1000000000 %}
+                                ${{ "{:.2f}".format(stock.market_cap / 1000000000) }}B
+                            {% else %}
+                                ${{ "{:.2f}".format(stock.market_cap / 1000000) }}M
+                            {% endif %}
+                        {% else %}--{% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+                <tr class="hover:bg-[#F4F0EB]/30">
+                    <td class="px-4 py-3 text-sm text-[#6B6460]">P/E Ratio (TTM)</td>
+                    {% for stock in stocks %}
+                    <td class="px-4 py-3 text-right text-[#1A1A18]">
+                        {% if stock.pe_ratio %}{{ "{:.2f}".format(stock.pe_ratio) }}{% else %}--{% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+                <tr class="hover:bg-[#F4F0EB]/30">
+                    <td class="px-4 py-3 text-sm text-[#6B6460]">Forward P/E</td>
+                    {% for stock in stocks %}
+                    <td class="px-4 py-3 text-right text-[#1A1A18]">
+                        {% if stock.forward_pe %}{{ "{:.2f}".format(stock.forward_pe) }}{% else %}--{% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+                <tr class="hover:bg-[#F4F0EB]/30">
+                    <td class="px-4 py-3 text-sm text-[#6B6460]">PEG Ratio</td>
+                    {% for stock in stocks %}
+                    <td class="px-4 py-3 text-right text-[#1A1A18]">
+                        {% if stock.peg_ratio %}{{ "{:.2f}".format(stock.peg_ratio) }}{% else %}--{% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+                <tr class="hover:bg-[#F4F0EB]/30">
+                    <td class="px-4 py-3 text-sm text-[#6B6460]">Dividend Yield</td>
+                    {% for stock in stocks %}
+                    <td class="px-4 py-3 text-right text-[#1A1A18]">
+                        {% if stock.dividend_yield %}{{ stock.dividend_yield }}%{% else %}--{% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+                <tr class="hover:bg-[#F4F0EB]/30">
+                    <td class="px-4 py-3 text-sm text-[#6B6460]">Beta</td>
+                    {% for stock in stocks %}
+                    <td class="px-4 py-3 text-right text-[#1A1A18]">
+                        {% if stock.beta %}{{ "{:.2f}".format(stock.beta) }}{% else %}--{% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+                <tr class="hover:bg-[#F4F0EB]/30">
+                    <td class="px-4 py-3 text-sm text-[#6B6460]">52-Week High</td>
+                    {% for stock in stocks %}
+                    <td class="px-4 py-3 text-right text-[#1A1A18]">
+                        {% if stock.fifty_two_week_high %}${{ "{:,.2f}".format(stock.fifty_two_week_high) }}{% else %}--{% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+                <tr class="hover:bg-[#F4F0EB]/30">
+                    <td class="px-4 py-3 text-sm text-[#6B6460]">52-Week Low</td>
+                    {% for stock in stocks %}
+                    <td class="px-4 py-3 text-right text-[#1A1A18]">
+                        {% if stock.fifty_two_week_low %}${{ "{:,.2f}".format(stock.fifty_two_week_low) }}{% else %}--{% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+                <tr class="hover:bg-[#F4F0EB]/30">
+                    <td class="px-4 py-3 text-sm text-[#6B6460]">Avg Volume</td>
+                    {% for stock in stocks %}
+                    <td class="px-4 py-3 text-right text-[#1A1A18]">
+                        {% if stock.avg_volume %}
+                            {% if stock.avg_volume >= 1000000 %}
+                                {{ "{:.2f}".format(stock.avg_volume / 1000000) }}M
+                            {% else %}
+                                {{ "{:,.0f}".format(stock.avg_volume) }}
+                            {% endif %}
+                        {% else %}--{% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+                <tr class="hover:bg-[#F4F0EB]/30">
+                    <td class="px-4 py-3 text-sm text-[#6B6460]">Sector</td>
+                    {% for stock in stocks %}
+                    <td class="px-4 py-3 text-right text-[#1A1A18] text-xs">
+                        {{ stock.sector or '--' }}
+                    </td>
+                    {% endfor %}
+                </tr>
+                <tr class="hover:bg-[#F4F0EB]/30">
+                    <td class="px-4 py-3 text-sm text-[#6B6460]">Industry</td>
+                    {% for stock in stocks %}
+                    <td class="px-4 py-3 text-right text-[#1A1A18] text-xs truncate max-w-[150px]">
+                        {{ stock.industry or '--' }}
+                    </td>
+                    {% endfor %}
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+{% else %}
+<div class="bg-white rounded-lg p-8 text-center border border-[#E8E0D5]">
+    <p class="text-[#6B6460]">Enter stock symbols above to compare them</p>
+</div>
+{% endif %}
+
+<!-- Chart Script -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const chartData = {{ chart_data | tojson | safe }};
+    const ctx = document.getElementById('comparisonChart');
+
+    if (!ctx || !chartData.labels || chartData.labels.length === 0) return;
+
+    const colors = [
+        'rgb(59, 130, 246)',   // Blue
+        'rgb(16, 185, 129)',   // Green
+        'rgb(245, 158, 11)',   // Orange
+        'rgb(239, 68, 68)',    // Red
+        'rgb(139, 92, 246)',   // Purple
+    ];
+
+    const datasets = [];
+    let colorIndex = 0;
+    for (const [symbol, data] of Object.entries(chartData.datasets)) {
+        datasets.push({
+            label: symbol,
+            data: data,
+            borderColor: colors[colorIndex % colors.length],
+            backgroundColor: 'transparent',
+            borderWidth: 2,
+            tension: 0.1,
+            pointRadius: 0,
+            pointHoverRadius: 4,
+        });
+        colorIndex++;
+    }
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: chartData.labels,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                intersect: false,
+                mode: 'index',
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        color: '#9ca3af',
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(31, 41, 55, 0.95)',
+                    titleColor: '#fff',
+                    bodyColor: '#9ca3af',
+                    borderColor: '#374151',
+                    borderWidth: 1,
+                    callbacks: {
+                        label: function(context) {
+                            const value = context.parsed.y;
+                            return context.dataset.label + ': ' + (value >= 0 ? '+' : '') + value.toFixed(2) + '%';
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: {
+                        color: 'rgba(75, 85, 99, 0.3)',
+                    },
+                    ticks: {
+                        color: '#9ca3af',
+                        maxTicksLimit: 8,
+                    }
+                },
+                y: {
+                    grid: {
+                        color: 'rgba(75, 85, 99, 0.3)',
+                    },
+                    ticks: {
+                        color: '#9ca3af',
+                        callback: function(value) {
+                            return (value >= 0 ? '+' : '') + value + '%';
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

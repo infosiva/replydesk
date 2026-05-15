@@ -1,0 +1,40 @@
+<h2>Analytics Dashboard — Where should it live?</h2>
+<p class="subtitle">tracker-api already has all the data at port 3098. Pick the home for the dashboard UI.</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Pure HTML in tracker-api/public</h3>
+      <p>Single HTML file. Deploy = scp to VPS. Zero framework. Live in minutes. No build step.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>Instant — no deploy pipeline</li><li>Reads /stats directly on same host</li><li>Lives forever on VPS port 3098</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>No auth (behind VPN/IP only)</li><li>Raw HTML/CSS — harder to extend</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>New page in agenttrace (agentlogs.app)</h3>
+      <p>Add /dashboard route to existing Next.js app. Vercel deploy. Proper React components. Uses Tremor (already in design system for agenttrace).</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>Proper UI with Tremor charts</li><li>Public URL (agentlogs.app/dashboard)</li><li>Auth can be added later</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Needs Vercel deploy + CORS on tracker-api</li><li>Slower to ship</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Extend site-watchdog dashboard (port 3099)</h3>
+      <p>Site-watchdog already shows uptime + Vercel deploy status. Add analytics tab to existing Node/Express dashboard.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>Unified ops view — uptime + analytics together</li><li>Already on VPS, scp deploy</li><li>Same codebase as site-watchdog</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>site-watchdog is Node/TS — more complex than option A</li><li>UI is already busy</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>

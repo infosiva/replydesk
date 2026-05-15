@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings - LinkedIn AI Assistant</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 400px;
+      min-height: 500px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 24px;
+    }
+
+    h2 {
+      font-size: 24px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    .section {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .section h3 {
+      font-size: 16px;
+      margin-bottom: 16px;
+      opacity: 0.9;
+    }
+
+    .input-group {
+      margin-bottom: 16px;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 8px;
+      opacity: 0.9;
+    }
+
+    .input-group input, .input-group textarea {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    .input-group input::placeholder,
+    .input-group textarea::placeholder {
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .input-group textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .info-text {
+      font-size: 12px;
+      opacity: 0.8;
+      margin-top: 8px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: white;
+      color: #667eea;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .success-message {
+      background: #4ade80;
+      color: white;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-size: 14px;
+      text-align: center;
+      display: none;
+    }
+
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+
+    .checkbox-group label {
+      font-size: 14px;
+      opacity: 0.9;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h2>⚙️ Settings</h2>
+
+  <div id="successMessage" class="success-message">
+    Settings saved successfully!
+  </div>
+
+  <div class="section">
+    <h3>🔑 API Configuration (Optional)</h3>
+    <div class="input-group">
+      <label for="apiKey">OpenAI API Key - Optional</label>
+      <input
+        type="password"
+        id="apiKey"
+        placeholder="sk-... (leave empty to skip)"
+      >
+      <p class="info-text">
+        <strong>You can skip this!</strong> This is only needed if you want to use AI features like auto-commenting and content generation. Auto-apply works without it.<br><br>
+        Advanced users: Bring your own key from <a href="https://platform.openai.com/api-keys" target="_blank" style="color: white;">OpenAI</a>
+      </p>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>👤 Your Profile (For Auto-Apply)</h3>
+
+    <div class="input-group">
+      <label for="fullName">Full Name</label>
+      <input
+        type="text"
+        id="fullName"
+        placeholder="John Doe"
+      >
+    </div>
+
+    <div class="input-group">
+      <label for="email">Email</label>
+      <input
+        type="email"
+        id="email"
+        placeholder="your.email@example.com"
+        autocomplete="email"
+      >
+    </div>
+
+    <div class="input-group">
+      <label for="phone">Phone Number</label>
+      <input
+        type="tel"
+        id="phone"
+        placeholder="Your phone number with country code"
+        autocomplete="tel"
+      >
+    </div>
+
+    <div class="input-group">
+      <label for="location">Location</label>
+      <input
+        type="text"
+        id="location"
+        placeholder="San Francisco, CA"
+      >
+    </div>
+
+    <p class="info-text" style="margin-bottom: 16px;">
+      This information will be used to auto-fill job applications
+    </p>
+  </div>
+
+  <div class="section">
+    <h3>💼 Your Expertise (For Job Matching)</h3>
+
+    <div class="input-group">
+      <label for="jobTitle">Current Job Title / Role</label>
+      <input
+        type="text"
+        id="jobTitle"
+        placeholder="e.g., Software Engineer, Product Manager"
+      >
+    </div>
+
+    <div class="input-group">
+      <label for="skills">Your Skills (comma separated)</label>
+      <textarea
+        id="skills"
+        placeholder="e.g., React, TypeScript, Python, AWS, Product Management"
+        style="min-height: 80px; resize: vertical;"
+      ></textarea>
+      <p class="info-text">Separate skills with commas - this helps match you with relevant jobs</p>
+    </div>
+
+    <div class="input-group">
+      <label for="yearsExperience">Years of Experience</label>
+      <input
+        type="number"
+        id="yearsExperience"
+        placeholder="5"
+        min="0"
+      >
+    </div>
+
+    <p class="info-text">
+      This helps us find jobs that match your experience level and skills
+    </p>
+  </div>
+
+  <div class="section">
+    <h3>🎯 Job Preferences</h3>
+
+    <div class="checkbox-group">
+      <input type="checkbox" id="onlyEasyApply" checked>
+      <label for="onlyEasyApply">Only apply to Easy Apply jobs</label>
+    </div>
+
+    <div class="checkbox-group">
+      <input type="checkbox" id="skipCoverLetter" checked>
+      <label for="skipCoverLetter">Skip jobs requiring cover letter</label>
+    </div>
+
+    <div class="checkbox-group">
+      <input type="checkbox" id="skipAssessments">
+      <label for="skipAssessments">Skip jobs with assessments</label>
+    </div>
+
+    <div class="input-group">
+      <label for="maxApplicationsPerDay">Max Applications Per Day</label>
+      <input
+        type="number"
+        id="maxApplicationsPerDay"
+        value="50"
+        min="1"
+        max="50"
+      >
+      <p class="info-text">Recommended: 20-50 to stay under LinkedIn's radar</p>
+    </div>
+  </div>
+
+  <button class="btn btn-primary" id="saveSettingsBtn">
+    Save Settings
+  </button>
+
+  <div style="margin-top: 16px; text-align: center;">
+    <a href="popup.html" style="color: white; text-decoration: none; opacity: 0.8; font-size: 14px;">
+      ← Back to Dashboard
+    </a>
+  </div>
+
+  <script src="settings.js"></script>
+</body>
+</html>

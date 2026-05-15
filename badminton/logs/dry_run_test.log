@@ -1,0 +1,18 @@
+19:36:10  INFO      ============================================================
+19:36:10  INFO        DRY-RUN TEST — Court 4 | 19:00 | 2026-04-11 (Saturday)
+19:36:10  INFO      ============================================================
+19:36:14  INFO      My Details page loaded
+19:36:14  INFO      Email entered
+19:36:16  INFO      Email Next clicked
+19:36:16  INFO      Password entered
+19:36:19  INFO      Password Next (login) clicked
+19:36:23  INFO      Facilities page loaded
+19:36:23  INFO      Login complete
+19:36:27  INFO      Target date 2026-04-11 is now visible
+19:36:27  INFO      Trying Court 4 at 19:00 …
+19:36:27  INFO      Clicked Court 4 @ 19:00 via table index (JS)
+19:36:28  INFO      Court 4 @ 19:00 — no modal, probably booked
+19:36:29  INFO      ============================================================
+19:36:29  INFO        Result : FAILED
+19:36:29  INFO        Message: No courts available at 19:00 on 2026-04-11
+19:36:29  INFO      ============================================================

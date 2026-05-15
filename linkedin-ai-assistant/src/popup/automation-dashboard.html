@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Automation Dashboard - LinkedIn AI</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 450px;
+      min-height: 600px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .header {
+      padding: 20px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .header h1 {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    .container {
+      padding: 20px;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    .status-card {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .status-item {
+      text-align: center;
+    }
+
+    .status-number {
+      font-size: 24px;
+      font-weight: 700;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .status-label {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+
+    .section {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .section h2 {
+      font-size: 16px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .automation-item {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .automation-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .automation-info {
+      flex: 1;
+    }
+
+    .automation-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .automation-desc {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+
+    .automation-stats {
+      font-size: 11px;
+      opacity: 0.7;
+      margin-top: 4px;
+    }
+
+    /* Toggle Switch */
+    .toggle {
+      position: relative;
+      width: 50px;
+      height: 26px;
+      flex-shrink: 0;
+    }
+
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(255, 255, 255, 0.3);
+      transition: .3s;
+      border-radius: 26px;
+    }
+
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    .toggle input:checked + .toggle-slider {
+      background-color: #4ade80;
+    }
+
+    .toggle input:checked + .toggle-slider:before {
+      transform: translateX(24px);
+    }
+
+    .toggle input:disabled + .toggle-slider {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 8px;
+    }
+
+    .btn-primary {
+      background: white;
+      color: #667eea;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+    }
+
+    .premium-badge {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 12px;
+      margin-left: 8px;
+    }
+
+    .upgrade-banner {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .upgrade-banner h3 {
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+
+    .upgrade-banner p {
+      font-size: 13px;
+      opacity: 0.9;
+      margin-bottom: 12px;
+    }
+
+    .footer {
+      padding: 16px;
+      text-align: center;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+
+    .footer-links a {
+      color: white;
+      text-decoration: none;
+      font-size: 13px;
+      opacity: 0.8;
+    }
+
+    .footer-links a:hover {
+      opacity: 1;
+    }
+
+    .success-message {
+      background: #4ade80;
+      color: white;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-size: 14px;
+      text-align: center;
+      display: none;
+    }
+
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.5);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🤖 LinkedIn Automation</h1>
+    <p>Control all your LinkedIn AI features</p>
+  </div>
+
+  <div class="container">
+    <div id="successMessage" class="success-message">
+      Automation settings saved!
+    </div>
+
+    <div id="upgradeBanner" class="upgrade-banner" style="display: none;">
+      <h3>🚀 Unlock Full Automation</h3>
+      <p>Upgrade to Premium for all automation features</p>
+      <button class="btn btn-primary" id="upgradeBtn">
+        Upgrade to Premium - $29/mo
+      </button>
+    </div>
+
+    <!-- Today's Activity -->
+    <div class="status-card">
+      <h2 style="font-size: 14px; margin-bottom: 12px; opacity: 0.9;">📊 Today's Activity</h2>
+      <div class="status-grid">
+        <div class="status-item">
+          <span class="status-number" id="jobsApplied">0</span>
+          <span class="status-label">Jobs Applied</span>
+        </div>
+        <div class="status-item">
+          <span class="status-number" id="commentsPosted">0</span>
+          <span class="status-label">Comments Posted</span>
+        </div>
+        <div class="status-item">
+          <span class="status-number" id="reactionsGiven">0</span>
+          <span class="status-label">Reactions Given</span>
+        </div>
+        <div class="status-item">
+          <span class="status-number" id="connectRequests">0</span>
+          <span class="status-label">Connect Requests</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Job Application Automation -->
+    <div class="section">
+      <h2>💼 Job Applications</h2>
+
+      <div class="automation-item">
+        <div class="automation-info">
+          <div class="automation-title">
+            Auto-Apply to Jobs
+            <span class="premium-badge" id="autoApplyBadge">PREMIUM</span>
+          </div>
+          <div class="automation-desc">Automatically apply to Easy Apply jobs</div>
+          <div class="automation-stats">Limit: <span id="autoApplyLimit">50/day</span></div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="autoApplyToggle">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="automation-item">
+        <div class="automation-info">
+          <div class="automation-title">Smart Job Filtering</div>
+          <div class="automation-desc">Only apply to relevant jobs based on your profile</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="smartFilterToggle" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Engagement Automation -->
+    <div class="section">
+      <h2>💬 Engagement</h2>
+
+      <div class="automation-item">
+        <div class="automation-info">
+          <div class="automation-title">
+            Auto-Comment on Posts
+            <span class="premium-badge">PREMIUM</span>
+          </div>
+          <div class="automation-desc">AI generates and posts thoughtful comments</div>
+          <div class="automation-stats">Limit: <span id="autoCommentLimit">20/day</span></div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="autoCommentToggle">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="automation-item">
+        <div class="automation-info">
+          <div class="automation-title">Auto-React to Posts</div>
+          <div class="automation-desc">Automatically like relevant posts from your network</div>
+          <div class="automation-stats">Limit: <span id="autoReactLimit">50/day</span></div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="autoReactToggle">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="automation-item">
+        <div class="automation-info">
+          <div class="automation-title">
+            Auto-Reply to Your Comments
+            <span class="premium-badge">PREMIUM</span>
+          </div>
+          <div class="automation-desc">AI replies to comments on your posts</div>
+          <div class="automation-stats">Limit: <span id="autoReplyLimit">30/day</span></div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="autoReplyToggle">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Networking Automation -->
+    <div class="section">
+      <h2>🤝 Networking</h2>
+
+      <div class="automation-item">
+        <div class="automation-info">
+          <div class="automation-title">
+            Auto-Connect with People
+            <span class="premium-badge">PREMIUM</span>
+          </div>
+          <div class="automation-desc">Send personalized connection requests</div>
+          <div class="automation-stats">Limit: <span id="autoConnectLimit">10/day</span></div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="autoConnectToggle">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="automation-item">
+        <div class="automation-info">
+          <div class="automation-title">Auto-Accept Connections</div>
+          <div class="automation-desc">Automatically accept connection requests</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="autoAcceptToggle">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Notifications -->
+    <div class="section">
+      <h2>🔔 Notifications</h2>
+
+      <div class="automation-item">
+        <div class="automation-info">
+          <div class="automation-title">Daily Activity Report</div>
+          <div class="automation-desc">Get daily summary of automation activities</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="dailyReportToggle" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="automation-item">
+        <div class="automation-info">
+          <div class="automation-title">Success Notifications</div>
+          <div class="automation-desc">Show notifications when actions complete</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="successNotifToggle" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Safety Settings -->
+    <div class="section">
+      <h2>🛡️ Safety</h2>
+
+      <div class="automation-item">
+        <div class="automation-info">
+          <div class="automation-title">Human-like Delays</div>
+          <div class="automation-desc">Random delays between actions (recommended)</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="humanDelaysToggle" checked disabled>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="automation-item">
+        <div class="automation-info">
+          <div class="automation-title">Daily Limits</div>
+          <div class="automation-desc">Enforce daily action limits (recommended)</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="dailyLimitsToggle" checked disabled>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="saveSettingsBtn">
+      💾 Save All Settings
+    </button>
+
+    <button class="btn btn-secondary" id="pauseAllBtn">
+      ⏸ Pause All Automation
+    </button>
+  </div>
+
+  <div class="footer">
+    <div class="footer-links">
+      <a href="popup.html">← Dashboard</a>
+      <a href="settings.html">⚙️ Settings</a>
+      <a href="#" id="helpLink">❓ Help</a>
+    </div>
+    <p style="font-size: 12px; opacity: 0.7;">
+      Use responsibly • Stay within limits
+    </p>
+  </div>
+
+  <script src="automation-dashboard.js"></script>
+</body>
+</html>

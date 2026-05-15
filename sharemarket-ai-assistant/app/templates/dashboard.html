@@ -1,0 +1,762 @@
+{% extends "base.html" %}
+
+{% block title %}Market Dashboard — StockPulse{% endblock %}
+
+{% block content %}
+
+{# ── Inject notable movers data for toast notifications ── #}
+<script>
+window.__notableMovers = [
+    {% for s in (gainers[:3] + losers[:2]) %}
+    { symbol: "{{ s.symbol }}", price: {{ s.price or 0 }}, change_pct: {{ s.change_pct or 0 }} }{% if not loop.last %},{% endif %}
+    {% endfor %}
+];
+</script>
+
+{% if error %}
+<div style="background:var(--red-dim); border:1px solid var(--red); border-radius:8px; padding:12px 16px; margin-bottom:16px; color:var(--red); font-size:13px;">
+    {{ error }}
+</div>
+{% endif %}
+
+<!-- ── MARKET SENTIMENT BAR ── -->
+{% set total_gainers = gainers | length %}
+{% set total_losers  = losers  | length %}
+{% set total_stocks  = total_gainers + total_losers %}
+{% if total_stocks > 0 %}
+{% set bull_pct = ((total_gainers / total_stocks) * 100) | int %}
+{% else %}
+{% set bull_pct = 50 %}
+{% endif %}
+<div style="background:var(--bg-card); border:1px solid var(--border); border-radius:8px; padding:12px 16px; margin-bottom:18px; display:flex; align-items:center; gap:16px;">
+    <span style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-muted); flex-shrink:0;">Market Sentiment</span>
+    <div style="flex:1; position:relative;">
+        <div class="sentiment-bar"></div>
+        <div class="sentiment-needle" style="left:{{ bull_pct }}%;"></div>
+    </div>
+    <div style="display:flex; gap:12px; flex-shrink:0; font-size:12px;">
+        <span style="color:var(--red);">{{ total_losers }} ▼ Bearish</span>
+        <span style="color:var(--text-muted);">|</span>
+        <span style="color:var(--green);">{{ total_gainers }} ▲ Bullish</span>
+    </div>
+</div>
+
+<!-- ── QUICK SEARCH + PERIOD BAR ── -->
+<div style="display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-bottom:18px;">
+    <form method="get" action="/dashboard/" style="display:flex; gap:8px; flex:1; max-w-xs;">
+        <input type="text" name="chart_symbol"
+               value="{{ current_chart_symbol }}"
+               placeholder="Ticker — AAPL, TSLA, BTC-USD…"
+               class="sp-input flex-1" autocomplete="off">
+        <input type="hidden" name="period" value="{{ current_period }}">
+        <button type="submit" class="sp-btn">Chart →</button>
+    </form>
+    <!-- Quick picks -->
+    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+        {% for sym in ['AAPL','NVDA','TSLA','SPY','QQQ','BTC-USD','GLD'] %}
+        <a href="/dashboard/?chart_symbol={{ sym }}&period={{ current_period }}"
+           style="padding:5px 10px; border-radius:16px; font-size:11px; font-weight:600; text-decoration:none; transition:all 0.15s;
+                  {% if sym == current_chart_symbol %}background:var(--accent-dim); color:var(--accent); border:1px solid rgba(0,212,170,0.4);
+                  {% else %}background:var(--bg-card2); color:var(--text-sec); border:1px solid var(--border);{% endif %}">
+            {{ sym }}
+        </a>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- ── TABS ── -->
+<div style="display:flex; border-bottom:1px solid var(--border); margin-bottom:20px; overflow-x:auto; gap:0;">
+    <button onclick="switchTab('overview')" id="tab-overview" class="sp-tab active">
+        📊 Overview
+    </button>
+    <button onclick="switchTab('movers')" id="tab-movers" class="sp-tab">
+        🔥 Top Movers
+    </button>
+    <button onclick="switchTab('india')" id="tab-india" class="sp-tab">
+        🇮🇳 India
+    </button>
+    <button onclick="switchTab('analysis')" id="tab-analysis" class="sp-tab">
+        🔬 Analysis
+    </button>
+    <button onclick="switchTab('news')" id="tab-news" class="sp-tab">
+        📰 News
+    </button>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     OVERVIEW TAB
+════════════════════════════════════════════════════════════ -->
+<div id="panel-overview">
+
+    <!-- Market Indices -->
+    <section style="margin-bottom:22px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <h2 style="font-size:13px; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-muted);">Market Indices</h2>
+            <span style="font-size:11px; color:var(--text-muted);">Click to chart</span>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(160px, 1fr)); gap:10px;">
+            {% for index in indices %}
+            {% set up = index.change_pct is not none and index.change_pct >= 0 %}
+            <div onclick="window.location.href='/dashboard/?chart_symbol={{ index.symbol }}&period={{ current_period }}'"
+                 style="background:var(--bg-card); border:1px solid {% if index.symbol == current_chart_symbol %}var(--accent){% else %}var(--border){% endif %}; border-radius:8px; padding:12px; cursor:pointer; transition:all 0.15s; position:relative; overflow:hidden;"
+                 onmouseover="this.style.borderColor='var(--accent)'; this.style.background='var(--bg-card2)'"
+                 onmouseout="this.style.borderColor='{% if index.symbol == current_chart_symbol %}var(--accent){% else %}var(--border){% endif %}'; this.style.background='var(--bg-card)'">
+                {% if index.symbol == current_chart_symbol %}
+                <div style="position:absolute; top:0; left:0; right:0; height:2px; background:var(--accent);"></div>
+                {% endif %}
+                <div style="font-size:11px; color:var(--text-muted); margin-bottom:4px;">{{ index.name }}</div>
+                <div style="font-size:18px; font-weight:700; color:var(--text-pri); font-variant-numeric:tabular-nums;">
+                    {% if index.price %}{{ "{:,.2f}".format(index.price) }}{% else %}--{% endif %}
+                </div>
+                {% if index.change_pct is not none %}
+                <div style="font-size:12px; font-weight:600; margin-top:4px; color:{% if up %}var(--green){% else %}var(--red){% endif %};">
+                    {% if up %}▲{% else %}▼{% endif %}
+                    {{ "{:.2f}".format(index.change_pct | abs) }}%
+                    <span style="font-weight:400; color:var(--text-muted); margin-left:4px;">{{ "{:+.2f}".format(index.change) }}</span>
+                </div>
+                <div class="change-bar" style="background:{% if up %}var(--green){% else %}var(--red){% endif %}; width:{{ [index.change_pct | abs * 8, 100] | min }}%; opacity:0.4;"></div>
+                {% endif %}
+            </div>
+            {% else %}
+            <div style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding:20px;">No index data</div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Price Chart Section -->
+    <section style="margin-bottom:22px;">
+        <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:8px; padding:18px;">
+            <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:14px;">
+                <div>
+                    <h2 style="font-size:15px; font-weight:700; color:var(--text-pri);">
+                        {{ chart_data.name if chart_data and chart_data.name else 'S&P 500' }}
+                        <span id="livePrice" style="font-size:22px; margin-left:8px; font-variant-numeric:tabular-nums;"></span>
+                        <span id="liveDelta" style="font-size:13px; font-weight:600; margin-left:6px;"></span>
+                    </h2>
+                    <p style="font-size:11px; color:var(--text-muted); margin-top:2px;">Click any index above to switch chart</p>
+                </div>
+                <!-- Period buttons -->
+                <div style="display:flex; gap:4px; flex-wrap:wrap;">
+                    {% for p in periods %}
+                    <a href="/dashboard/?chart_symbol={{ current_chart_symbol }}&period={{ p }}&sector={{ current_sector }}"
+                       class="sp-btn-ghost {% if p == current_period %}active{% endif %}"
+                       style="padding:5px 10px; font-size:12px;">{{ p }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Indicator toggles -->
+            <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; align-items:center;">
+                <span style="font-size:11px; color:var(--text-muted); margin-right:4px;">Indicators:</span>
+                <button id="toggleSMA20"   onclick="toggleIndicator('sma20')"   class="sp-btn-ghost" style="padding:4px 10px; font-size:11px;">SMA 20</button>
+                <button id="toggleSMA50"   onclick="toggleIndicator('sma50')"   class="sp-btn-ghost" style="padding:4px 10px; font-size:11px;">SMA 50</button>
+                <button id="toggleRSI"     onclick="toggleIndicator('rsi')"     class="sp-btn-ghost" style="padding:4px 10px; font-size:11px;">RSI</button>
+                <button id="toggleMACD"    onclick="toggleIndicator('macd')"    class="sp-btn-ghost" style="padding:4px 10px; font-size:11px;">MACD</button>
+                <button id="toggleVolume"  onclick="toggleIndicator('volume')"  class="sp-btn-ghost active" style="padding:4px 10px; font-size:11px;">Volume</button>
+            </div>
+
+            <div style="height:240px; position:relative;"><canvas id="priceChart"></canvas></div>
+            <div id="volumeContainer" style="height:60px; margin-top:6px;"><canvas id="volumeChart"></canvas></div>
+            <div id="rsiContainer"    style="height:80px; margin-top:6px; display:none;">
+                <div style="font-size:10px; color:var(--text-muted); margin-bottom:2px;">RSI <span style="color:var(--gold)">70=Overbought</span> · <span style="color:var(--green)">30=Oversold</span></div>
+                <canvas id="rsiChart"></canvas>
+            </div>
+            <div id="macdContainer"   style="height:80px; margin-top:6px; display:none;">
+                <div style="font-size:10px; color:var(--text-muted); margin-bottom:2px;">MACD · Signal · Histogram</div>
+                <canvas id="macdChart"></canvas>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pre/Post Market -->
+    {% if extended_hours %}
+    <section style="margin-bottom:22px;">
+        <h2 style="font-size:13px; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-muted); margin-bottom:10px;">Extended Hours</h2>
+        <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:10px;">
+            {% for stock in extended_hours %}
+            {% if stock.pre_market_price or stock.post_market_price %}
+            <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:8px; padding:10px 14px; cursor:pointer;"
+                 onclick="window.location.href='/dashboard/?chart_symbol={{ stock.symbol }}&period=1D'">
+                <div style="font-weight:700; color:var(--text-pri); font-size:13px;">{{ stock.symbol }}</div>
+                {% if stock.pre_market_price %}
+                <div style="font-size:11px; margin-top:4px;">
+                    <span style="color:var(--gold); font-weight:600;">PRE</span>
+                    <span style="color:var(--text-sec); margin-left:6px;">${{ "{:.2f}".format(stock.pre_market_price) }}</span>
+                    {% if stock.pre_change %}
+                    <span style="margin-left:6px; font-weight:600; color:{% if stock.pre_change >= 0 %}var(--green){% else %}var(--red){% endif %};">
+                        {{ "{:+.2f}".format(stock.pre_change) }}%
+                    </span>
+                    {% endif %}
+                </div>
+                {% endif %}
+                {% if stock.post_market_price %}
+                <div style="font-size:11px; margin-top:2px;">
+                    <span style="color:var(--text-muted); font-weight:600;">POST</span>
+                    <span style="color:var(--text-sec); margin-left:6px;">${{ "{:.2f}".format(stock.post_market_price) }}</span>
+                    {% if stock.post_change %}
+                    <span style="margin-left:6px; font-weight:600; color:{% if stock.post_change >= 0 %}var(--green){% else %}var(--red){% endif %};">
+                        {{ "{:+.2f}".format(stock.post_change) }}%
+                    </span>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Top Movers (overview preview) -->
+    <section style="margin-bottom:22px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <h2 style="font-size:13px; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-muted);">Top Movers Today</h2>
+            <button onclick="switchTab('movers')" style="font-size:12px; color:var(--accent); background:none; border:none; cursor:pointer; padding:0;">View All →</button>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <!-- Gainers -->
+            <div>
+                <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--green); margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+                    <span style="width:6px; height:6px; border-radius:50%; background:var(--green); display:inline-block; animation:pulse 2s infinite;"></span>
+                    Gainers
+                </div>
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:8px; overflow:hidden;">
+                    {% for stock in gainers[:5] %}
+                    <div onclick="window.location.href='/dashboard/?chart_symbol={{ stock.symbol }}&period=1D'"
+                         style="display:flex; justify-content:space-between; align-items:center; padding:9px 14px; border-bottom:1px solid var(--border2); cursor:pointer; transition:background 0.1s;"
+                         onmouseover="this.style.background='var(--bg-card2)'" onmouseout="this.style.background=''">
+                        <div>
+                            <div style="font-weight:700; color:var(--text-pri); font-size:13px;">{{ stock.symbol }}</div>
+                            <div style="font-size:11px; color:var(--text-muted);">${{ "{:.2f}".format(stock.price) }}</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-weight:700; color:var(--green); font-size:13px;">▲ {{ "{:.2f}".format(stock.change_pct) }}%</div>
+                            <div style="height:3px; border-radius:2px; background:var(--green); width:{{ [stock.change_pct * 10, 80] | min }}px; margin-top:4px; margin-left:auto; opacity:0.5;"></div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div style="padding:16px; text-align:center; color:var(--text-muted);">No data</div>
+                    {% endfor %}
+                </div>
+            </div>
+            <!-- Losers -->
+            <div>
+                <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--red); margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+                    <span style="width:6px; height:6px; border-radius:50%; background:var(--red); display:inline-block;"></span>
+                    Losers
+                </div>
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:8px; overflow:hidden;">
+                    {% for stock in losers[:5] %}
+                    <div onclick="window.location.href='/dashboard/?chart_symbol={{ stock.symbol }}&period=1D'"
+                         style="display:flex; justify-content:space-between; align-items:center; padding:9px 14px; border-bottom:1px solid var(--border2); cursor:pointer; transition:background 0.1s;"
+                         onmouseover="this.style.background='var(--bg-card2)'" onmouseout="this.style.background=''">
+                        <div>
+                            <div style="font-weight:700; color:var(--text-pri); font-size:13px;">{{ stock.symbol }}</div>
+                            <div style="font-size:11px; color:var(--text-muted);">${{ "{:.2f}".format(stock.price) }}</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-weight:700; color:var(--red); font-size:13px;">▼ {{ "{:.2f}".format(stock.change_pct | abs) }}%</div>
+                            <div style="height:3px; border-radius:2px; background:var(--red); width:{{ [stock.change_pct | abs * 10, 80] | min }}px; margin-top:4px; margin-left:auto; opacity:0.5;"></div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div style="padding:16px; text-align:center; color:var(--text-muted);">No data</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section>
+        <div style="background:linear-gradient(135deg, rgba(0,212,170,0.08) 0%, rgba(2,132,199,0.08) 100%); border:1px solid rgba(0,212,170,0.2); border-radius:10px; padding:20px 24px; display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:14px;">
+            <div>
+                <h3 style="font-size:16px; font-weight:700; color:var(--text-pri); margin-bottom:4px;">Ready to Start Investing?</h3>
+                <p style="font-size:13px; color:var(--text-sec);">Open a brokerage account with $0 commission trades and free stocks to start.</p>
+            </div>
+            <a href="/brokers" class="sp-btn" style="flex-shrink:0; text-decoration:none; padding:10px 20px;">Compare Brokers →</a>
+        </div>
+    </section>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     MOVERS TAB
+════════════════════════════════════════════════════════════ -->
+<div id="panel-movers" style="display:none;">
+    <!-- Filters -->
+    <div style="display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin-bottom:16px;">
+        <h2 style="font-size:15px; font-weight:700; color:var(--text-pri);">Top Movers</h2>
+        <div style="display:flex; gap:8px; align-items:center;">
+            <label style="font-size:12px; color:var(--text-muted);">Sector:</label>
+            <select id="sectorFilter" onchange="applyFilters()" class="sp-input" style="padding:5px 10px;">
+                {% for key, name in stock_sectors.items() %}
+                <option value="{{ key }}" {% if key == current_sector %}selected{% endif %}>{{ name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center;">
+            <label style="font-size:12px; color:var(--text-muted);">Market Cap:</label>
+            <select id="marketCapFilter" onchange="applyFilters()" class="sp-input" style="padding:5px 10px;">
+                {% for key, name in market_cap_categories.items() %}
+                <option value="{{ key }}" {% if key == current_market_cap %}selected{% endif %}>{{ name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+        <!-- Gainers full table -->
+        <section>
+            <h3 style="font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--green); margin-bottom:10px;">▲ Top Gainers</h3>
+            <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:8px; overflow:hidden;">
+                <table class="data-table" style="width:100%; border-collapse:collapse;">
+                    <thead>
+                        <tr style="border-bottom:1px solid var(--border);">
+                            <th style="padding:10px 14px; text-align:left;">#</th>
+                            <th style="padding:10px 14px; text-align:left;">Symbol</th>
+                            <th style="padding:10px 14px; text-align:right;">Price</th>
+                            <th style="padding:10px 14px; text-align:right;">Change</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for stock in gainers %}
+                        <tr style="border-bottom:1px solid var(--border2);"
+                            onclick="window.location.href='/dashboard/?chart_symbol={{ stock.symbol }}&period=1D'">
+                            <td style="padding:9px 14px; color:var(--text-muted); font-size:12px;">{{ loop.index }}</td>
+                            <td style="padding:9px 14px;">
+                                <span style="font-weight:700; color:var(--text-pri);">{{ stock.symbol }}</span>
+                                {% if stock.sector %}<span style="font-size:10px; color:var(--text-muted); margin-left:6px;">{{ stock.sector }}</span>{% endif %}
+                            </td>
+                            <td style="padding:9px 14px; text-align:right; color:var(--text-sec); font-variant-numeric:tabular-nums;">${{ "{:.2f}".format(stock.price) }}</td>
+                            <td style="padding:9px 14px; text-align:right;">
+                                <span style="background:var(--green-dim); color:var(--green); font-weight:700; padding:3px 8px; border-radius:12px; font-size:12px; font-variant-numeric:tabular-nums;">
+                                    +{{ "{:.2f}".format(stock.change_pct) }}%
+                                </span>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="4" style="padding:20px; text-align:center; color:var(--text-muted);">No data</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Losers full table -->
+        <section>
+            <h3 style="font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--red); margin-bottom:10px;">▼ Top Losers</h3>
+            <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:8px; overflow:hidden;">
+                <table class="data-table" style="width:100%; border-collapse:collapse;">
+                    <thead>
+                        <tr style="border-bottom:1px solid var(--border);">
+                            <th style="padding:10px 14px; text-align:left;">#</th>
+                            <th style="padding:10px 14px; text-align:left;">Symbol</th>
+                            <th style="padding:10px 14px; text-align:right;">Price</th>
+                            <th style="padding:10px 14px; text-align:right;">Change</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for stock in losers %}
+                        <tr style="border-bottom:1px solid var(--border2);"
+                            onclick="window.location.href='/dashboard/?chart_symbol={{ stock.symbol }}&period=1D'">
+                            <td style="padding:9px 14px; color:var(--text-muted); font-size:12px;">{{ loop.index }}</td>
+                            <td style="padding:9px 14px;">
+                                <span style="font-weight:700; color:var(--text-pri);">{{ stock.symbol }}</span>
+                                {% if stock.sector %}<span style="font-size:10px; color:var(--text-muted); margin-left:6px;">{{ stock.sector }}</span>{% endif %}
+                            </td>
+                            <td style="padding:9px 14px; text-align:right; color:var(--text-sec); font-variant-numeric:tabular-nums;">${{ "{:.2f}".format(stock.price) }}</td>
+                            <td style="padding:9px 14px; text-align:right;">
+                                <span style="background:var(--red-dim); color:var(--red); font-weight:700; padding:3px 8px; border-radius:12px; font-size:12px; font-variant-numeric:tabular-nums;">
+                                    {{ "{:.2f}".format(stock.change_pct) }}%
+                                </span>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="4" style="padding:20px; text-align:center; color:var(--text-muted);">No data</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     ANALYSIS TAB
+════════════════════════════════════════════════════════════ -->
+<!-- ════════════════════════════════════════════════════════════
+     INDIA TAB — NSE/BSE stocks
+════════════════════════════════════════════════════════════ -->
+<div id="panel-india" style="display:none;">
+    <div style="margin-bottom:16px;">
+        <h3 style="color:var(--text-pri); font-size:14px; font-weight:600; margin-bottom:4px;">🇮🇳 India Market — NSE Top Stocks</h3>
+        <p style="color:var(--text-sec); font-size:12px;">Live prices for Nifty50 blue chips. Click any symbol to view chart.</p>
+    </div>
+
+    <!-- India quick search -->
+    <div style="margin-bottom:16px; display:flex; gap:8px; flex-wrap:wrap;">
+        {% for sym in ['RELIANCE.NS','TCS.NS','HDFCBANK.NS','INFY.NS','HINDUNILVR.NS','ICICIBANK.NS','KOTAKBANK.NS','BHARTIARTL.NS','ITC.NS','LT.NS','WIPRO.NS','AXISBANK.NS'] %}
+        <a href="/dashboard/?chart_symbol={{ sym }}" style="padding:4px 10px; border-radius:20px; background:var(--bg-card2); border:1px solid var(--border); color:var(--text-sec); font-size:11px; font-weight:600; text-decoration:none; transition:all 0.15s;"
+           onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'"
+           onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-sec)'">
+            {{ sym.replace('.NS','') }}
+        </a>
+        {% endfor %}
+    </div>
+
+    <!-- Nifty indices quick view -->
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:10px; margin-bottom:16px;">
+        {% for idx in ['^NSEI','^BSESN','^NSEBANK'] %}
+        <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:12px;">
+            <div style="font-size:10px; color:var(--text-muted); margin-bottom:4px;">
+                {{ {'%5ENSEI':'Nifty 50','%5EBSESN':'Sensex','%5ENBANK':'Bank Nifty'}.get(idx.replace('^','%5E'), idx) }}
+            </div>
+            <div style="font-size:13px; font-weight:700; color:var(--text-pri);">Loading…</div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Ask AI about India market -->
+    <div style="background:var(--accent-dim); border:1px solid var(--accent); border-radius:10px; padding:14px; display:flex; align-items:center; gap:12px;">
+        <span style="font-size:20px;">🤖</span>
+        <div style="flex:1;">
+            <div style="font-size:12px; font-weight:600; color:var(--accent); margin-bottom:4px;">Ask AI about India stocks</div>
+            <div style="font-size:11px; color:var(--text-sec);">Try: "Analyse Reliance Industries" · "Compare TCS vs Infosys" · "Nifty sector movers today"</div>
+        </div>
+        <a href="/dashboard/#chat" style="padding:6px 14px; background:var(--accent); color:#000; border-radius:8px; font-size:11px; font-weight:700; text-decoration:none;">Ask →</a>
+    </div>
+</div>
+
+<div id="panel-analysis" style="display:none;">
+    <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:16px;">
+
+        <!-- Analyst Ratings -->
+        <section>
+            <h2 style="font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--accent); margin-bottom:10px;">📈 Analyst Ratings</h2>
+            <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:8px; overflow:hidden;">
+                <table class="data-table" style="width:100%; border-collapse:collapse;">
+                    <thead>
+                        <tr style="border-bottom:1px solid var(--border);">
+                            <th style="padding:9px 12px; text-align:left;">Stock</th>
+                            <th style="padding:9px 12px; text-align:center;">Rating</th>
+                            <th style="padding:9px 12px; text-align:right;">Upside</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for stock in analyst_ratings %}
+                        <tr style="border-bottom:1px solid var(--border2);"
+                            onclick="window.location.href='/dashboard/?chart_symbol={{ stock.symbol }}&period=1D'">
+                            <td style="padding:9px 12px;">
+                                <div style="font-weight:700; color:var(--text-pri); font-size:13px;">{{ stock.symbol }}</div>
+                                <div style="font-size:11px; color:var(--text-muted); max-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ stock.name }}</div>
+                            </td>
+                            <td style="padding:9px 12px; text-align:center;">
+                                {% if stock.rating %}
+                                <span style="font-size:11px; font-weight:600; padding:3px 8px; border-radius:10px;
+                                    {% if 'buy' in stock.rating.lower() or 'strong' in stock.rating.lower() %}background:var(--green-dim); color:var(--green);
+                                    {% elif 'hold' in stock.rating.lower() or 'neutral' in stock.rating.lower() %}background:rgba(210,153,34,0.15); color:var(--gold);
+                                    {% else %}background:var(--red-dim); color:var(--red);{% endif %}">
+                                    {{ stock.rating | capitalize }}
+                                </span>
+                                {% else %}
+                                <span style="color:var(--text-muted);">--</span>
+                                {% endif %}
+                            </td>
+                            <td style="padding:9px 12px; text-align:right; font-weight:600; font-variant-numeric:tabular-nums; font-size:13px;
+                                       color:{% if stock.upside_pct is not none and stock.upside_pct >= 0 %}var(--green){% elif stock.upside_pct is not none %}var(--red){% else %}var(--text-muted){% endif %};">
+                                {% if stock.upside_pct is not none %}{{ "{:+.1f}".format(stock.upside_pct) }}%{% else %}--{% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="3" style="padding:20px; text-align:center; color:var(--text-muted);">No ratings data</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Dividend Stocks -->
+        <section>
+            <h2 style="font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--gold); margin-bottom:10px;">💰 High Dividend Yield</h2>
+            <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:8px; overflow:hidden;">
+                <table class="data-table" style="width:100%; border-collapse:collapse;">
+                    <thead>
+                        <tr style="border-bottom:1px solid var(--border);">
+                            <th style="padding:9px 12px; text-align:left;">Stock</th>
+                            <th style="padding:9px 12px; text-align:right;">Yield</th>
+                            <th style="padding:9px 12px; text-align:right;">Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for stock in dividend_stocks %}
+                        <tr style="border-bottom:1px solid var(--border2);"
+                            onclick="window.location.href='/dashboard/?chart_symbol={{ stock.symbol }}&period=1D'">
+                            <td style="padding:9px 12px;">
+                                <div style="font-weight:700; color:var(--text-pri); font-size:13px;">{{ stock.symbol }}</div>
+                                <div style="font-size:11px; color:var(--text-muted); max-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ stock.name }}</div>
+                            </td>
+                            <td style="padding:9px 12px; text-align:right;">
+                                <span style="font-weight:700; color:var(--gold); font-size:13px;">{{ stock.yield_pct }}%</span>
+                            </td>
+                            <td style="padding:9px 12px; text-align:right; color:var(--text-sec); font-variant-numeric:tabular-nums;">
+                                {% if stock.price %}${{ "{:.2f}".format(stock.price) }}{% else %}--{% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="3" style="padding:20px; text-align:center; color:var(--text-muted);">No dividend data</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Upcoming Earnings -->
+        <section>
+            <h2 style="font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:#fb923c; margin-bottom:10px;">📅 Upcoming Earnings</h2>
+            <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:8px; overflow:hidden;">
+                <table class="data-table" style="width:100%; border-collapse:collapse;">
+                    <thead>
+                        <tr style="border-bottom:1px solid var(--border);">
+                            <th style="padding:9px 12px; text-align:left;">Stock</th>
+                            <th style="padding:9px 12px; text-align:right;">Date</th>
+                            <th style="padding:9px 12px; text-align:right;">In</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for stock in upcoming_earnings %}
+                        <tr style="border-bottom:1px solid var(--border2);"
+                            onclick="window.location.href='/dashboard/?chart_symbol={{ stock.symbol }}&period=1D'">
+                            <td style="padding:9px 12px;">
+                                <div style="font-weight:700; color:var(--text-pri); font-size:13px;">{{ stock.symbol }}</div>
+                                <div style="font-size:11px; color:var(--text-muted);">{{ stock.name[:18] if stock.name else '' }}</div>
+                            </td>
+                            <td style="padding:9px 12px; text-align:right; color:var(--text-sec); font-size:12px;">{{ stock.earnings_date }}</td>
+                            <td style="padding:9px 12px; text-align:right;">
+                                <span style="font-size:11px; font-weight:600; padding:3px 8px; border-radius:10px;
+                                    {% if stock.days_until <= 3 %}background:rgba(251,146,60,0.15); color:#fb923c;
+                                    {% else %}background:var(--bg-base); color:var(--text-muted);{% endif %}">
+                                    {% if stock.days_until == 0 %}Today!
+                                    {% elif stock.days_until == 1 %}Tomorrow
+                                    {% else %}{{ stock.days_until }}d{% endif %}
+                                </span>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="3" style="padding:20px; text-align:center; color:var(--text-muted);">No upcoming earnings</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     NEWS TAB
+════════════════════════════════════════════════════════════ -->
+<div id="panel-news" style="display:none;">
+
+    <!-- Sector Heatmap -->
+    <section style="margin-bottom:22px;">
+        <h2 style="font-size:13px; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-muted); margin-bottom:12px;">Sector Performance Heatmap</h2>
+        <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(100px, 1fr)); gap:6px;">
+            {% for sector in sectors %}
+            {% set up = sector.change_pct >= 0 %}
+            {% set intensity = [sector.change_pct | abs * 15, 60] | min %}
+            <div class="sector-cell" style="
+                background: {% if up %}rgba(63,185,80,{{ intensity / 100 + 0.05 }}){% else %}rgba(248,81,73,{{ intensity / 100 + 0.05 }}){% endif %};
+                border: 1px solid {% if up %}rgba(63,185,80,0.2){% else %}rgba(248,81,73,0.2){% endif %};
+                cursor:pointer;"
+                 onclick="window.location.href='/dashboard/?chart_symbol={{ sector.symbol }}&period=1D'" title="{{ sector.symbol }}">
+                <div style="font-size:11px; color:var(--text-sec); margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ sector.sector[:10] }}</div>
+                <div style="font-weight:700; font-size:13px; color:{% if up %}var(--green){% else %}var(--red){% endif %};">
+                    {{ "{:+.2f}".format(sector.change_pct) }}%
+                </div>
+            </div>
+            {% else %}
+            <div style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding:20px;">No sector data</div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Market News -->
+    <section>
+        <h2 style="font-size:13px; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-muted); margin-bottom:12px;">Market News</h2>
+        <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:8px; overflow:hidden;">
+            {% for article in news %}
+            <a href="{{ article.link }}" target="_blank" rel="noopener noreferrer"
+               style="display:block; padding:14px 16px; border-bottom:1px solid var(--border2); text-decoration:none; transition:background 0.1s;"
+               onmouseover="this.style.background='var(--bg-card2)'" onmouseout="this.style.background=''">
+                <div style="font-weight:600; color:var(--text-pri); font-size:13px; line-height:1.4;">{{ article.title }}</div>
+                <div style="font-size:11px; color:var(--text-muted); margin-top:4px; display:flex; align-items:center; gap:8px;">
+                    <span>{{ article.publisher }}</span>
+                    {% if article.related %}
+                    <span style="color:var(--border);">·</span>
+                    <span style="color:var(--accent);">{{ article.related }}</span>
+                    {% endif %}
+                </div>
+            </a>
+            {% else %}
+            <div style="padding:24px; text-align:center; color:var(--text-muted);">No news available</div>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+
+<!-- ── SCRIPTS ── -->
+<script>
+// Tab switching
+function switchTab(name) {
+    ['overview','movers','india','analysis','news'].forEach(t => {
+        document.getElementById('panel-'+t).style.display = t === name ? 'block' : 'none';
+        const btn = document.getElementById('tab-'+t);
+        if (t === name) { btn.classList.add('active'); } else { btn.classList.remove('active'); }
+    });
+    localStorage.setItem('dashboardTab', name);
+    if (name === 'overview' && window.priceChart) {
+        setTimeout(() => {
+            window.priceChart.resize();
+            if (window.volumeChart) window.volumeChart.resize();
+        }, 10);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const saved = localStorage.getItem('dashboardTab') || 'overview';
+    switchTab(saved);
+});
+
+// Filters
+function applyFilters() {
+    const sector = document.getElementById('sectorFilter').value;
+    const mc = document.getElementById('marketCapFilter').value;
+    const url = new URL(window.location);
+    url.searchParams.set('sector', sector);
+    url.searchParams.set('market_cap', mc);
+    localStorage.setItem('dashboardTab', 'movers');
+    window.location.href = url.toString();
+}
+</script>
+
+<script>
+// ── Chart rendering ──
+document.addEventListener('DOMContentLoaded', function() {
+    const CD = {{ chart_data | tojson | safe }};
+    const prices  = CD.prices  || [];
+    const labels  = CD.labels  || [];
+    const volumes = CD.volumes || [];
+
+    // Show current price + delta in header
+    if (prices.length >= 2) {
+        const cur = prices[prices.length - 1];
+        const open = prices[0];
+        const delta = cur - open;
+        const dpct  = (delta / open * 100);
+        const up    = delta >= 0;
+        const lp = document.getElementById('livePrice');
+        const ld = document.getElementById('liveDelta');
+        if (lp) { lp.textContent = '$' + cur.toLocaleString(undefined, {minimumFractionDigits:2,maximumFractionDigits:2}); lp.style.color = up ? 'var(--green)' : 'var(--red)'; }
+        if (ld) { ld.textContent = (up?'▲':'▼') + ' ' + Math.abs(dpct).toFixed(2) + '%'; ld.style.color = up ? 'var(--green)' : 'var(--red)'; }
+    }
+
+    const up = prices.length >= 2 && prices[prices.length-1] >= prices[0];
+    const lineColor = up ? '#3fb950' : '#f85149';
+    const bgColor   = up ? 'rgba(63,185,80,0.08)' : 'rgba(248,81,73,0.08)';
+
+    const GRID_COLOR = 'rgba(48,54,61,0.6)';
+    const TICK_COLOR = '#484f58';
+
+    // Price chart
+    const priceCtx = document.getElementById('priceChart')?.getContext('2d');
+    if (!priceCtx) return;
+    window.priceChart = new Chart(priceCtx, {
+        type: 'line',
+        data: { labels, datasets: [{ label: CD.name || 'Price', data: prices, borderColor: lineColor, backgroundColor: bgColor, borderWidth: 2, fill: true, tension: 0.1, pointRadius: 0, pointHoverRadius: 4, yAxisID: 'y' }] },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            interaction: { intersect: false, mode: 'index' },
+            plugins: {
+                legend: { display: false },
+                tooltip: { backgroundColor: 'rgba(22,27,34,0.98)', titleColor: '#e6edf3', bodyColor: '#8b949e', borderColor: '#30363d', borderWidth: 1,
+                    callbacks: { label: ctx => ' $' + ctx.parsed.y.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}) } }
+            },
+            scales: {
+                x: { display: false },
+                y: { grid: { color: GRID_COLOR }, ticks: { color: TICK_COLOR, callback: v => '$' + v.toLocaleString() } }
+            }
+        }
+    });
+
+    // Volume chart
+    const volCtx = document.getElementById('volumeChart')?.getContext('2d');
+    if (volCtx) {
+        const volColors = prices.map((p,i) => i > 0 && p >= prices[i-1] ? 'rgba(63,185,80,0.45)' : 'rgba(248,81,73,0.45)');
+        window.volumeChart = new Chart(volCtx, {
+            type: 'bar',
+            data: { labels, datasets: [{ label: 'Volume', data: volumes, backgroundColor: volColors, borderWidth: 0 }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                scales: { x: { grid: { color: GRID_COLOR }, ticks: { color: TICK_COLOR, maxTicksLimit: 8 } }, y: { display: false } } }
+        });
+    }
+
+    // RSI chart
+    const rsiCtx = document.getElementById('rsiChart')?.getContext('2d');
+    const rsiData = CD.rsi || [];
+    if (rsiCtx) {
+        window.rsiChart = new Chart(rsiCtx, {
+            type: 'line',
+            data: { labels, datasets: [{ label: 'RSI', data: rsiData, borderColor: '#a78bfa', backgroundColor: 'transparent', borderWidth: 1.5, pointRadius: 0, tension: 0.1 }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+                scales: { x: { display: false }, y: { min: 0, max: 100, grid: { color: GRID_COLOR }, ticks: { color: TICK_COLOR, stepSize: 30 } } } }
+        });
+    }
+
+    // MACD chart
+    const macdCtx = document.getElementById('macdChart')?.getContext('2d');
+    const MD = CD.macd || { macd: [], signal: [], histogram: [] };
+    if (macdCtx) {
+        window.macdChart = new Chart(macdCtx, {
+            type: 'bar',
+            data: { labels, datasets: [
+                { label: 'MACD', type: 'line', data: MD.macd, borderColor: '#38bdf8', backgroundColor: 'transparent', borderWidth: 1.5, pointRadius: 0, order: 1 },
+                { label: 'Signal', type: 'line', data: MD.signal, borderColor: '#f59e0b', backgroundColor: 'transparent', borderWidth: 1.5, pointRadius: 0, order: 2 },
+                { label: 'Histogram', data: MD.histogram, backgroundColor: MD.histogram.map(v => v >= 0 ? 'rgba(63,185,80,0.5)' : 'rgba(248,81,73,0.5)'), order: 3 }
+            ]},
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+                scales: { x: { display: false }, y: { grid: { color: GRID_COLOR }, ticks: { color: TICK_COLOR } } } }
+        });
+    }
+
+    // SMA datasets
+    if (CD.sma_20) window.sma20Dataset = { label:'SMA 20', data: CD.sma_20, borderColor:'#f59e0b', backgroundColor:'transparent', borderWidth:1.5, pointRadius:0, tension:0.1 };
+    if (CD.sma_50) window.sma50Dataset = { label:'SMA 50', data: CD.sma_50, borderColor:'#a78bfa', backgroundColor:'transparent', borderWidth:1.5, pointRadius:0, tension:0.1 };
+});
+
+function toggleIndicator(ind) {
+    const ids = { sma20:'toggleSMA20', sma50:'toggleSMA50', rsi:'toggleRSI', macd:'toggleMACD', volume:'toggleVolume' };
+    const btn = document.getElementById(ids[ind]);
+    window.indicatorState = window.indicatorState || { sma20:false, sma50:false, rsi:false, macd:false, volume:true };
+    window.indicatorState[ind] = !window.indicatorState[ind];
+    btn.classList.toggle('active', window.indicatorState[ind]);
+
+    if (ind === 'sma20' && window.sma20Dataset) {
+        const i = window.priceChart.data.datasets.findIndex(d => d.label==='SMA 20');
+        if (window.indicatorState.sma20 && i===-1) window.priceChart.data.datasets.push(window.sma20Dataset);
+        else if (!window.indicatorState.sma20 && i!==-1) window.priceChart.data.datasets.splice(i,1);
+        window.priceChart.update();
+    } else if (ind === 'sma50' && window.sma50Dataset) {
+        const i = window.priceChart.data.datasets.findIndex(d => d.label==='SMA 50');
+        if (window.indicatorState.sma50 && i===-1) window.priceChart.data.datasets.push(window.sma50Dataset);
+        else if (!window.indicatorState.sma50 && i!==-1) window.priceChart.data.datasets.splice(i,1);
+        window.priceChart.update();
+    } else if (ind === 'rsi') {
+        document.getElementById('rsiContainer').style.display = window.indicatorState.rsi ? 'block' : 'none';
+    } else if (ind === 'macd') {
+        document.getElementById('macdContainer').style.display = window.indicatorState.macd ? 'block' : 'none';
+    } else if (ind === 'volume') {
+        document.getElementById('volumeContainer').style.display = window.indicatorState.volume ? 'block' : 'none';
+    }
+}
+</script>
+
+{% endblock %}

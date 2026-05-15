@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LinkedIn AI Assistant</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 350px;
+      min-height: 400px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .container {
+      padding: 20px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .header h1 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .header p {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .status {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    .status-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .status-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .status-label {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .status-value {
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    .features {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    .features h3 {
+      font-size: 16px;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 0;
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .feature-item::before {
+      content: '✓';
+      margin-right: 8px;
+      font-weight: bold;
+      color: #4ade80;
+    }
+
+    .settings {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    .settings h3 {
+      font-size: 16px;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    .input-group {
+      margin-bottom: 12px;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 6px;
+      opacity: 0.9;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      font-size: 14px;
+    }
+
+    .input-group input::placeholder {
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: white;
+      color: #667eea;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      margin-top: 8px;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .upgrade-banner {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .upgrade-banner h3 {
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+
+    .upgrade-banner p {
+      font-size: 13px;
+      opacity: 0.9;
+      margin-bottom: 12px;
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      opacity: 0.7;
+      margin-top: 20px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .success-message {
+      background: #4ade80;
+      color: white;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-size: 14px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>LinkedIn AI</h1>
+      <p>Your AI-powered LinkedIn assistant</p>
+    </div>
+
+    <div id="successMessage" class="success-message hidden">
+      Settings saved successfully!
+    </div>
+
+    <div class="status">
+      <div class="status-item">
+        <span class="status-label">Profile Status</span>
+        <span class="status-value" id="profileStatus">⏳ Checking...</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">AI Actions Today</span>
+        <span class="status-value" id="usageCount">0 / 10</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">Plan</span>
+        <span class="status-value" id="planType">Free</span>
+      </div>
+    </div>
+
+    <div id="profileWarning" class="hidden" style="
+      background: rgba(255, 200, 0, 0.2);
+      border: 1px solid rgba(255, 200, 0, 0.5);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 20px;
+      font-size: 13px;
+    ">
+      <strong>⚠️ Profile Incomplete</strong><br>
+      <span id="missingFieldsText"></span><br>
+      <a href="settings.html" style="color: white; text-decoration: underline;">Complete your profile →</a>
+    </div>
+
+    <div class="upgrade-banner" id="upgradeBanner">
+      <h3>Unlock Unlimited AI Actions</h3>
+      <p>Upgrade to Pro for unlimited comments, summaries & more</p>
+      <button class="btn btn-primary" id="upgradeBtn">
+        Upgrade to Pro - $9/month
+      </button>
+    </div>
+
+    <div class="features">
+      <h3>Features Active on LinkedIn:</h3>
+      <div class="feature-item">🎯 Auto-apply to jobs (5 free applications!)</div>
+      <div class="feature-item">🤖 Generate AI comments on posts</div>
+      <div class="feature-item">📝 Summarize long posts instantly</div>
+      <div class="feature-item">💬 Write connection messages</div>
+      <div class="feature-item">✨ Generate post ideas</div>
+    </div>
+
+    <div class="settings">
+      <h3>Quick Settings</h3>
+      <div class="input-group">
+        <label for="groqApiKey">Groq API Key <span style="color:#4ade80;font-weight:700;">FREE</span></label>
+        <input
+          type="password"
+          id="groqApiKey"
+          placeholder="gsk_... (get free key at console.groq.com)"
+        >
+        <p style="font-size: 11px; opacity: 0.8; margin-top: 4px;">
+          Free at console.groq.com — powers AI comments &amp; summaries.
+        </p>
+      </div>
+      <div class="input-group">
+        <label for="anthropicApiKey">Anthropic Key (optional fallback)</label>
+        <input
+          type="password"
+          id="anthropicApiKey"
+          placeholder="sk-ant-... (optional)"
+        >
+      </div>
+      <button class="btn btn-primary" id="saveBtn">
+        Save Settings
+      </button>
+    </div>
+
+    <a href="settings.html" style="text-decoration: none;" id="profileButtonLink">
+      <button class="btn btn-secondary" id="profileButton" style="
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: 2px solid white;
+      ">
+        ⚙️ Complete Profile to Auto-Apply
+      </button>
+    </a>
+
+    <button class="btn btn-secondary" id="automationBtn">
+      ⚡ Automation Dashboard
+    </button>
+
+    <button class="btn btn-secondary" id="howToUseBtn">
+      📚 How to Use
+    </button>
+
+    <div class="footer">
+      Made with ❤️ for LinkedIn power users
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

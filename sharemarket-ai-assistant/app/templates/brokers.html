@@ -1,0 +1,318 @@
+{% extends "base.html" %}
+
+{% block title %}Best Low-Fee Brokers - StockPulse{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto">
+    <!-- Hero Section -->
+    <section class="text-center mb-12">
+        <h1 class="text-3xl md:text-4xl font-bold text-white mb-4">
+            Start Investing with <span class="text-green-400">Zero Commission</span>
+        </h1>
+        <p class="text-[#6B6460] text-lg max-w-2xl mx-auto">
+            Compare the best low-fee brokers and start building your portfolio today.
+            All brokers listed offer commission-free stock trading.
+        </p>
+    </section>
+
+    <!-- Sign-up Bonus Banner -->
+    <section class="mb-8">
+        <div class="bg-gradient-to-r from-green-900/50 to-blue-900/50 rounded-xl p-6 border border-green-700/50">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-white">Get Free Stock Worth Up To $200!</h3>
+                        <p class="text-[#6B6460]">Open a Webull account and get free stocks when you deposit $100+</p>
+                    </div>
+                </div>
+                <a href="/go/webull" target="_blank" onclick="trackClick('webull', 'banner')"
+                   class="flex-shrink-0 bg-[#059669] hover:bg-[#047857] text-white px-6 py-3 rounded-lg font-semibold transition">
+                    Claim Free Stock
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Broker Cards -->
+    <section class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+        <!-- Robinhood -->
+        <div class="bg-gray-800 rounded-xl p-6 border border-[#E8E0D5] hover:border-green-500 transition relative">
+            <div class="absolute top-2 right-2 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded">FREE STOCK</div>
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white font-bold text-xl">R</div>
+                <div>
+                    <h3 class="text-xl font-bold text-white">Robinhood</h3>
+                    <p class="text-green-400 text-sm">Best for Beginners</p>
+                </div>
+            </div>
+            <ul class="text-[#6B6460] text-sm space-y-2 mb-6">
+                <li class="flex items-center gap-2">
+                    <span class="text-green-400">&#10003;</span> $0 commission trades
+                </li>
+                <li class="flex items-center gap-2">
+                    <span class="text-green-400">&#10003;</span> No account minimum
+                </li>
+                <li class="flex items-center gap-2">
+                    <span class="text-green-400">&#10003;</span> Fractional shares
+                </li>
+                <li class="flex items-center gap-2">
+                    <span class="text-green-400">&#10003;</span> Crypto trading
+                </li>
+            </ul>
+            <a href="/go/robinhood" target="_blank" rel="noopener sponsored" onclick="trackClick('robinhood', 'card')"
+               class="block w-full bg-[#059669] hover:bg-[#047857] text-white text-center py-3 rounded-lg font-semibold transition">
+                Get Free Stock
+            </a>
+        </div>
+
+        <!-- Webull -->
+        <div class="bg-gray-800 rounded-xl p-6 border border-[#E8E0D5] hover:border-orange-500 transition relative">
+            <div class="absolute top-2 right-2 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded">UP TO $200</div>
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold text-xl">W</div>
+                <div>
+                    <h3 class="text-xl font-bold text-white">Webull</h3>
+                    <p class="text-orange-400 text-sm">Best for Active Traders</p>
+                </div>
+            </div>
+            <ul class="text-[#6B6460] text-sm space-y-2 mb-6">
+                <li class="flex items-center gap-2">
+                    <span class="text-green-400">&#10003;</span> $0 commission trades
+                </li>
+                <li class="flex items-center gap-2">
+                    <span class="text-green-400">&#10003;</span> Extended hours trading
+                </li>
+                <li class="flex items-center gap-2">
+                    <span class="text-green-400">&#10003;</span> Advanced charting
+                </li>
+                <li class="flex items-center gap-2">
+                    <span class="text-green-400">&#10003;</span> Paper trading
+                </li>
+            </ul>
+            <a href="/go/webull" target="_blank" rel="noopener sponsored" onclick="trackClick('webull', 'card')"
+               class="block w-full bg-orange-600 hover:bg-orange-700 text-white text-center py-3 rounded-lg font-semibold transition">
+                Get Free Stocks
+            </a>
+        </div>
+
+        <!-- Fidelity -->
+        <div class="bg-gray-800 rounded-xl p-6 border border-[#E8E0D5] hover:border-green-500 transition">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-12 h-12 bg-green-700 rounded-full flex items-center justify-center text-white font-bold text-xl">F</div>
+                <div>
+                    <h3 class="text-xl font-bold text-white">Fidelity</h3>
+                    <p class="text-green-400 text-sm">Best for Long-term</p>
+                </div>
+            </div>
+            <ul class="text-[#6B6460] text-sm space-y-2 mb-6">
+                <li class="flex items-center gap-2">
+                    <span class="text-green-400">&#10003;</span> $0 commission trades
+                </li>
+                <li class="flex items-center gap-2">
+                    <span class="text-green-400">&#10003;</span> Excellent research
+                </li>
+                <li class="flex items-center gap-2">
+                    <span class="text-green-400">&#10003;</span> Retirement accounts
+                </li>
+                <li class="flex items-center gap-2">
+                    <span class="text-green-400">&#10003;</span> 24/7 support
+                </li>
+            </ul>
+            <a href="/go/fidelity" target="_blank" rel="noopener sponsored" onclick="trackClick('fidelity', 'card')"
+               class="block w-full bg-green-700 hover:bg-green-800 text-white text-center py-3 rounded-lg font-semibold transition">
+                Open Account
+            </a>
+        </div>
+
+        <!-- Charles Schwab -->
+        <div class="bg-gray-800 rounded-xl p-6 border border-[#E8E0D5] hover:border-[#D97757] transition">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-12 h-12 bg-[#D97757] rounded-full flex items-center justify-center text-white font-bold text-xl">S</div>
+                <div>
+                    <h3 class="text-xl font-bold text-white">Charles Schwab</h3>
+                    <p class="text-[#D97757] text-sm">Best All-Around</p>
+                </div>
+            </div>
+            <ul class="text-[#6B6460] text-sm space-y-2 mb-6">
+                <li class="flex items-center gap-2">
+                    <span class="text-green-400">&#10003;</span> $0 commission trades
+                </li>
+                <li class="flex items-center gap-2">
+                    <span class="text-green-400">&#10003;</span> Banking services
+                </li>
+                <li class="flex items-center gap-2">
+                    <span class="text-green-400">&#10003;</span> Fractional shares
+                </li>
+                <li class="flex items-center gap-2">
+                    <span class="text-green-400">&#10003;</span> Great mobile app
+                </li>
+            </ul>
+            <a href="/go/schwab" target="_blank" rel="noopener sponsored" onclick="trackClick('schwab', 'card')"
+               class="block w-full bg-[#D97757] hover:bg-[#C5653F] text-white text-center py-3 rounded-lg font-semibold transition">
+                Open Account
+            </a>
+        </div>
+
+        <!-- Interactive Brokers -->
+        <div class="bg-gray-800 rounded-xl p-6 border border-[#E8E0D5] hover:border-red-500 transition">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center text-white font-bold text-xl">IB</div>
+                <div>
+                    <h3 class="text-xl font-bold text-white">Interactive Brokers</h3>
+                    <p class="text-red-400 text-sm">Best for Professionals</p>
+                </div>
+            </div>
+            <ul class="text-[#6B6460] text-sm space-y-2 mb-6">
+                <li class="flex items-center gap-2">
+                    <span class="text-green-400">&#10003;</span> Low margin rates
+                </li>
+                <li class="flex items-center gap-2">
+                    <span class="text-green-400">&#10003;</span> Global markets
+                </li>
+                <li class="flex items-center gap-2">
+                    <span class="text-green-400">&#10003;</span> Advanced tools
+                </li>
+                <li class="flex items-center gap-2">
+                    <span class="text-green-400">&#10003;</span> Options & futures
+                </li>
+            </ul>
+            <a href="/go/ibkr" target="_blank" rel="noopener sponsored" onclick="trackClick('ibkr', 'card')"
+               class="block w-full bg-red-600 hover:bg-red-700 text-white text-center py-3 rounded-lg font-semibold transition">
+                Open Account
+            </a>
+        </div>
+
+        <!-- E*TRADE -->
+        <div class="bg-gray-800 rounded-xl p-6 border border-[#E8E0D5] hover:border-purple-500 transition">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold text-xl">E</div>
+                <div>
+                    <h3 class="text-xl font-bold text-white">E*TRADE</h3>
+                    <p class="text-purple-400 text-sm">Best for Options</p>
+                </div>
+            </div>
+            <ul class="text-[#6B6460] text-sm space-y-2 mb-6">
+                <li class="flex items-center gap-2">
+                    <span class="text-green-400">&#10003;</span> $0 commission trades
+                </li>
+                <li class="flex items-center gap-2">
+                    <span class="text-green-400">&#10003;</span> Power E*TRADE platform
+                </li>
+                <li class="flex items-center gap-2">
+                    <span class="text-green-400">&#10003;</span> Options analytics
+                </li>
+                <li class="flex items-center gap-2">
+                    <span class="text-green-400">&#10003;</span> Educational content
+                </li>
+            </ul>
+            <a href="/go/etrade" target="_blank" rel="noopener sponsored" onclick="trackClick('etrade', 'card')"
+               class="block w-full bg-purple-600 hover:bg-purple-700 text-white text-center py-3 rounded-lg font-semibold transition">
+                Open Account
+            </a>
+        </div>
+    </section>
+
+    <!-- Comparison Table -->
+    <section class="mb-12">
+        <h2 class="text-2xl font-bold text-white mb-6">Quick Comparison</h2>
+        <div class="bg-gray-800 rounded-xl border border-[#E8E0D5] overflow-x-auto">
+            <table class="w-full min-w-[700px]">
+                <thead class="bg-[#F4F0EB]/50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-sm text-[#6B6460]">Broker</th>
+                        <th class="px-4 py-3 text-center text-sm text-[#6B6460]">Stock Trades</th>
+                        <th class="px-4 py-3 text-center text-sm text-[#6B6460]">Options</th>
+                        <th class="px-4 py-3 text-center text-sm text-[#6B6460]">Account Min</th>
+                        <th class="px-4 py-3 text-center text-sm text-[#6B6460]">Fractional</th>
+                        <th class="px-4 py-3 text-center text-sm text-[#6B6460]">Best For</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-700">
+                    <tr class="hover:bg-[#F4F0EB]/30">
+                        <td class="px-4 py-3 font-medium text-white">Robinhood</td>
+                        <td class="px-4 py-3 text-center text-green-400">$0</td>
+                        <td class="px-4 py-3 text-center text-green-400">$0</td>
+                        <td class="px-4 py-3 text-center text-[#6B6460]">$0</td>
+                        <td class="px-4 py-3 text-center text-green-400">Yes</td>
+                        <td class="px-4 py-3 text-center text-[#6B6460]">Beginners</td>
+                    </tr>
+                    <tr class="hover:bg-[#F4F0EB]/30">
+                        <td class="px-4 py-3 font-medium text-white">Webull</td>
+                        <td class="px-4 py-3 text-center text-green-400">$0</td>
+                        <td class="px-4 py-3 text-center text-green-400">$0</td>
+                        <td class="px-4 py-3 text-center text-[#6B6460]">$0</td>
+                        <td class="px-4 py-3 text-center text-green-400">Yes</td>
+                        <td class="px-4 py-3 text-center text-[#6B6460]">Active Traders</td>
+                    </tr>
+                    <tr class="hover:bg-[#F4F0EB]/30">
+                        <td class="px-4 py-3 font-medium text-white">Fidelity</td>
+                        <td class="px-4 py-3 text-center text-green-400">$0</td>
+                        <td class="px-4 py-3 text-center text-[#6B6460]">$0.65/contract</td>
+                        <td class="px-4 py-3 text-center text-[#6B6460]">$0</td>
+                        <td class="px-4 py-3 text-center text-green-400">Yes</td>
+                        <td class="px-4 py-3 text-center text-[#6B6460]">Long-term</td>
+                    </tr>
+                    <tr class="hover:bg-[#F4F0EB]/30">
+                        <td class="px-4 py-3 font-medium text-white">Schwab</td>
+                        <td class="px-4 py-3 text-center text-green-400">$0</td>
+                        <td class="px-4 py-3 text-center text-[#6B6460]">$0.65/contract</td>
+                        <td class="px-4 py-3 text-center text-[#6B6460]">$0</td>
+                        <td class="px-4 py-3 text-center text-green-400">Yes</td>
+                        <td class="px-4 py-3 text-center text-[#6B6460]">All-around</td>
+                    </tr>
+                    <tr class="hover:bg-[#F4F0EB]/30">
+                        <td class="px-4 py-3 font-medium text-white">IBKR</td>
+                        <td class="px-4 py-3 text-center text-green-400">$0</td>
+                        <td class="px-4 py-3 text-center text-[#6B6460]">$0.65/contract</td>
+                        <td class="px-4 py-3 text-center text-[#6B6460]">$0</td>
+                        <td class="px-4 py-3 text-center text-green-400">Yes</td>
+                        <td class="px-4 py-3 text-center text-[#6B6460]">Professionals</td>
+                    </tr>
+                    <tr class="hover:bg-[#F4F0EB]/30">
+                        <td class="px-4 py-3 font-medium text-white">E*TRADE</td>
+                        <td class="px-4 py-3 text-center text-green-400">$0</td>
+                        <td class="px-4 py-3 text-center text-[#6B6460]">$0.65/contract</td>
+                        <td class="px-4 py-3 text-center text-[#6B6460]">$0</td>
+                        <td class="px-4 py-3 text-center text-yellow-400">No</td>
+                        <td class="px-4 py-3 text-center text-[#6B6460]">Options</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Disclaimer -->
+    <section class="text-center text-[#9B9490] text-sm">
+        <p>
+            Investment involves risk. Past performance is not indicative of future results.
+            StockPulse may receive compensation from partner brokers through affiliate links.
+            This does not affect our rankings or recommendations.
+        </p>
+    </section>
+</div>
+
+<script>
+// Track affiliate clicks
+function trackClick(broker, source) {
+    // Send to GoatCounter
+    if (typeof goatcounter !== 'undefined') {
+        goatcounter.count({
+            path: '/affiliate/' + broker,
+            title: 'Affiliate Click: ' + broker,
+            event: true
+        });
+    }
+    // Also track via our API
+    fetch('/api/v1/affiliates/track', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({broker: broker, source: source})
+    }).catch(() => {});
+}
+</script>
+{% endblock %}

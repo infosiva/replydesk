@@ -1,0 +1,214 @@
+{
+  "sites": [
+    {
+      "id": "clawdbotai",
+      "name": "ClawdBot AI Showcase",
+      "path": "/root/agents/clawdbotai",
+      "vercelProject": "clawdbotai",
+      "url": "https://clawdbotai.tech",
+      "type": "nextjs",
+      "youtubeChannel": null,
+      "focus": ["seo", "monetization", "adsense", "user-engagement"],
+      "keyFiles": [
+        "app/layout.tsx",
+        "app/page.tsx",
+        "app/sitemap.ts",
+        "components/Hero.tsx",
+        "components/Footer.tsx",
+        "public/ads.txt"
+      ]
+    },
+    {
+      "id": "quicktech",
+      "name": "QuickTech AI",
+      "path": "/root/agents/quicktech",
+      "vercelProject": "quicktech",
+      "url": "https://quicktech.vercel.app",
+      "type": "nextjs",
+      "youtubeChannel": "@QuickTechAIPro",
+      "focus": ["youtube-cta", "seo", "monetization", "subscriber-growth"],
+      "keyFiles": [
+        "app/layout.tsx",
+        "app/page.tsx",
+        "components"
+      ]
+    },
+    {
+      "id": "quizbytesdaily",
+      "name": "QuizBytes Daily",
+      "path": "/root/agents/quizbytesdaily",
+      "vercelProject": "quizbytesdaily",
+      "url": "https://quizbytes.dev",
+      "type": "nextjs",
+      "youtubeChannel": null,
+      "focus": ["seo", "viral-sharing", "user-retention", "monetization"],
+      "keyFiles": [
+        "app/layout.tsx",
+        "app/page.tsx",
+        "components"
+      ]
+    },
+    {
+      "id": "worldtrends",
+      "name": "World Trends",
+      "path": "/root/agents/worldtrends",
+      "vercelProject": "worldtrends",
+      "url": "https://worldtrends.today",
+      "type": "nextjs",
+      "youtubeChannel": null,
+      "focus": ["seo", "trending-content", "adsense", "social-sharing"],
+      "keyFiles": [
+        "app/layout.tsx",
+        "app/page.tsx"
+      ]
+    },
+    {
+      "id": "ai-jobs-portal",
+      "name": "AI Jobs Portal",
+      "path": "/root/agents/ai-jobs-portal",
+      "vercelProject": "ai-jobs-portal",
+      "url": "https://www.aijobsportal.app",
+      "type": "nextjs",
+      "youtubeChannel": null,
+      "focus": ["seo", "job-listings", "email-capture", "monetization"],
+      "keyFiles": [
+        "app/layout.tsx",
+        "app/page.tsx",
+        "components"
+      ]
+    },
+    {
+      "id": "flighttracker",
+      "name": "FlightBrain",
+      "path": "/root/agents/flighttracker",
+      "vercelProject": null,
+      "url": "https://flightbrain.app",
+      "type": "cloudflare-pages",
+      "youtubeChannel": null,
+      "focus": ["seo", "adsense", "user-engagement", "cta-conversion"],
+      "keyFiles": [
+        "public/index.html",
+        "story-mode/app/page.tsx",
+        "story-mode/app/layout.tsx",
+        "story-mode/components/EmotionSelector.tsx",
+        "public/ads.txt"
+      ]
+    },
+    {
+      "id": "nammatamil",
+      "name": "NammaTamil.live",
+      "path": "/root/agents/nammatamil",
+      "vercelProject": "nammatamil",
+      "url": "https://nammatamil.live",
+      "type": "nextjs",
+      "youtubeChannel": null,
+      "focus": ["seo", "content-volume", "adsense", "social-sharing", "user-engagement"],
+      "keyFiles": [
+        "app/layout.tsx",
+        "app/page.tsx",
+        "app/globals.css",
+        "data/serials.ts",
+        "data/movies.ts",
+        "data/albums.ts",
+        "components/ContentCard.tsx",
+        "public/ads.txt"
+      ]
+    },
+    {
+      "id": "invoice-ai",
+      "name": "InvoiceMint",
+      "path": "/root/agents/invoice-ai",
+      "vercelProject": "invoice-ai",
+      "url": "https://invoicemint.cloud",
+      "type": "nextjs",
+      "youtubeChannel": null,
+      "focus": ["seo", "adsense", "user-engagement", "monetization", "cta-conversion"],
+      "keyFiles": [
+        "app/layout.tsx",
+        "app/page.tsx",
+        "app/components/InvoicePDF.tsx",
+        "app/api/generate/route.ts"
+      ]
+    },
+    {
+      "id": "ninjapa-landing",
+      "name": "NinjaPA Landing",
+      "path": "/root/agents/ninjapa-landing",
+      "vercelProject": "ninjapa-landing",
+      "url": "https://ninjapa-landing.vercel.app",
+      "type": "static",
+      "youtubeChannel": null,
+      "focus": ["seo", "cta-conversion", "user-engagement", "monetization"],
+      "keyFiles": [
+        "index.html"
+      ]
+    },
+    {
+      "id": "sharemarket",
+      "name": "StockPulse News",
+      "path": "/root/sharemarket-ai-assistant",
+      "vercelProject": null,
+      "url": "https://stockpulse.news",
+      "type": "docker",
+      "youtubeChannel": null,
+      "focus": ["seo", "stock-news", "adsense", "user-retention"],
+      "keyFiles": [
+        "templates/index.html",
+        "static",
+        "app.py"
+      ]
+    },
+    {
+      "id": "kwizzo",
+      "name": "Kwizzo",
+      "path": "/root/agents/kwizzo",
+      "vercelProject": "kwizzo",
+      "url": "https://kwizzo.app",
+      "type": "nextjs",
+      "youtubeChannel": null,
+      "focus": ["seo", "user-engagement", "monetization", "cta-conversion"],
+      "keyFiles": [
+        "app/layout.tsx",
+        "app/page.tsx",
+        "vertical.config.ts",
+        "components/Navbar.tsx"
+      ]
+    },
+    {
+      "id": "tutiq",
+      "name": "Tutiq",
+      "path": "/root/agents/nudge",
+      "vercelProject": "nudge",
+      "url": "https://tutiq.app",
+      "type": "nextjs",
+      "youtubeChannel": null,
+      "focus": ["seo", "user-engagement", "monetization", "cta-conversion"],
+      "keyFiles": [
+        "app/layout.tsx",
+        "app/page.tsx",
+        "vertical.config.ts",
+        "components/Navbar.tsx"
+      ]
+    },
+    {
+      "id": "quizbites",
+      "name": "QuizBites",
+      "path": "/root/agents/questly",
+      "vercelProject": "questly",
+      "url": "https://quizbites.app",
+      "type": "nextjs",
+      "youtubeChannel": null,
+      "focus": ["seo", "user-engagement", "monetization", "cta-conversion"],
+      "keyFiles": [
+        "app/layout.tsx",
+        "app/page.tsx",
+        "vertical.config.ts",
+        "components/Navbar.tsx"
+      ]
+    }
+  ],
+  "schedule": {
+    "rotationMode": "sequential",
+    "startIndex": 0
+  }
+}

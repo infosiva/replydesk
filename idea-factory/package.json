@@ -1,0 +1,16 @@
+{
+  "name": "idea-factory",
+  "version": "1.0.0",
+  "description": "Autonomous AI idea research, validation, and scoping agent",
+  "type": "module",
+  "scripts": {
+    "start": "node --import tsx/esm src/index.ts",
+    "dashboard": "node --import tsx/esm src/dashboard.ts",
+    "dev": "node --import tsx/esm src/index.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "dotenv": "^16.4.5",
+    "tsx": "^4.19.2"
+  }
+}
