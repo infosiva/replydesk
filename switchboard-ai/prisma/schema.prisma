@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Business {
+  id            String    @id @default(cuid())
+  name          String
+  twilioNumber  String    @unique
+  emailInbox    String    @unique
+  officeStatus  Status    @default(OPEN)
+  systemPrompt  String    @db.Text
+  contacts      Contact[]
+  createdAt     DateTime  @default(now())
+}
+
+model Contact {
+  id         String         @id @default(cuid())
+  businessId String
+  business   Business       @relation(fields: [businessId], references: [id])
+  name       String?
+  phone      String?
+  email      String?
+  events     ContactEvent[]
+  createdAt  DateTime       @default(now())
+
+  @@unique([businessId, phone])
+  @@unique([businessId, email])
+}
+
+model ContactEvent {
+  id         String     @id @default(cuid())
+  contactId  String
+  contact    Contact    @relation(fields: [contactId], references: [id])
+  type       EventType
+  direction  Direction
+  raw        String     @db.Text
+  aiDraft    String?    @db.Text
+  sentReply  String?    @db.Text
+  claimedBy  String?
+  createdAt  DateTime   @default(now())
+}
+
+enum Status    { OPEN CLOSED }
+enum EventType { CALL_INBOUND CALL_MISSED EMAIL_INBOUND SMS_INBOUND AI_REPLY HUMAN_REPLY }
+enum Direction { INBOUND OUTBOUND }
