@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<body>
+<canvas id="c"></canvas>
+<script>
+// Run this in a browser to generate icons, then save each canvas as PNG
+[16, 48, 128].forEach(size => {
+  const c = document.createElement("canvas");
+  c.width = c.height = size;
+  const ctx = c.getContext("2d");
+  const r = size * 0.45;
+
+  const grad = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, r);
+  grad.addColorStop(0, "#818cf8");
+  grad.addColorStop(1, "#4f46e5");
+
+  ctx.beginPath();
+  ctx.roundRect(size*0.1, size*0.1, size*0.8, size*0.8, size*0.2);
+  ctx.fillStyle = "#0a0e1a";
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.roundRect(size*0.1, size*0.1, size*0.8, size*0.8, size*0.2);
+  ctx.fillStyle = grad;
+  ctx.globalAlpha = 0.15;
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
+  ctx.strokeStyle = "#6366f1";
+  ctx.lineWidth = Math.max(1, size * 0.06);
+  ctx.stroke();
+
+  ctx.fillStyle = "#818cf8";
+  ctx.font = `bold ${size * 0.5}px -apple-system, sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("C", size/2, size/2 + size*0.02);
+
+  const link = document.createElement("a");
+  link.download = `icon${size}.png`;
+  link.href = c.toDataURL();
+  link.textContent = `Download icon${size}.png`;
+  document.body.appendChild(link);
+  document.body.appendChild(document.createElement("br"));
+});
+</script>
+</body>
+</html>

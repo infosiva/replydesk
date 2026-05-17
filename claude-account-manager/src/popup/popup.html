@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Claude Account Manager</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header>
+      <div class="logo">
+        <span class="logo-dot"></span>
+        <span class="logo-text">Claude<strong>AM</strong></span>
+      </div>
+      <div class="header-actions">
+        <button id="btn-settings" class="icon-btn" title="Settings">⚙️</button>
+        <button id="btn-refresh" class="icon-btn" title="Refresh">🔄</button>
+      </div>
+    </header>
+
+    <!-- Tab bar -->
+    <nav class="tabs">
+      <button class="tab active" data-tab="accounts">Accounts</button>
+      <button class="tab" data-tab="activity">Activity</button>
+      <button class="tab" data-tab="tips">Tips</button>
+    </nav>
+
+    <!-- Tab: Accounts -->
+    <div id="tab-accounts" class="tab-content active">
+      <div id="accounts-list"></div>
+
+      <div class="section-header">
+        <span>Smart recommendation</span>
+      </div>
+      <div id="recommendation" class="recommendation"></div>
+
+      <button id="btn-add-account" class="add-btn">+ Add account</button>
+    </div>
+
+    <!-- Tab: Activity -->
+    <div id="tab-activity" class="tab-content">
+      <div class="section-header"><span>Recent conversations</span></div>
+      <div id="sessions-list" class="sessions-list"></div>
+
+      <div class="section-header" style="margin-top:12px"><span>7-day usage trend</span></div>
+      <div id="sparklines"></div>
+    </div>
+
+    <!-- Tab: Tips -->
+    <div id="tab-tips" class="tab-content">
+      <div id="tips-content"></div>
+    </div>
+  </div>
+
+  <!-- Modal: Edit account -->
+  <div id="modal-overlay" class="hidden">
+    <div id="modal">
+      <h3 id="modal-title">Edit Account</h3>
+      <input type="hidden" id="edit-id" />
+      <label>Label <input id="edit-label" type="text" placeholder="e.g. Personal Pro" /></label>
+      <label>Email <input id="edit-email" type="email" placeholder="your@email.com" /></label>
+      <label>Plan
+        <select id="edit-plan">
+          <option value="free">Free</option>
+          <option value="pro">Pro ($20/mo)</option>
+          <option value="max5x">Max 5× ($100/mo)</option>
+          <option value="max20x">Max 20× ($200/mo)</option>
+        </select>
+      </label>
+      <label>Billing day of month <input id="edit-billing-day" type="number" min="1" max="28" value="1" /></label>
+      <label>Color <input id="edit-color" type="color" value="#6366f1" /></label>
+      <label>Profile URL (claude.ai with this account's session)
+        <input id="edit-url" type="url" placeholder="https://claude.ai" />
+      </label>
+      <div class="modal-actions">
+        <button id="btn-modal-cancel" class="btn-secondary">Cancel</button>
+        <button id="btn-modal-save" class="btn-primary">Save</button>
+        <button id="btn-modal-delete" class="btn-danger">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="popup.js" type="module"></script>
+</body>
+</html>
