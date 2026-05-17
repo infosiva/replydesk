@@ -1,0 +1,29 @@
+# Environment / secrets — NEVER commit these
+.env
+.env.local
+.env.shared
+.env.production
+.env.development
+*.env
+.env.*
+!.env.example
+
+# IDE / OS
+.DS_Store
+.vscode/
+.idea/
+*.swp
+
+# Build outputs
+.next/
+out/
+dist/
+build/
+node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Local settings with tokens
+.claude/settings.local.json
