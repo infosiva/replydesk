@@ -41,7 +41,7 @@ export default async function ContactPage({ params }: { params: Promise<{ id: st
       <div className="flex flex-1 overflow-hidden">
         <aside className="w-80 border-r border-white/10 overflow-y-auto py-2">
           <ContactList
-            contacts={contacts as Parameters<typeof ContactList>[0]['contacts']}
+            contacts={contacts as unknown as Parameters<typeof ContactList>[0]['contacts']}
             activeId={id}
           />
         </aside>
@@ -57,7 +57,7 @@ export default async function ContactPage({ params }: { params: Promise<{ id: st
           </div>
 
           <div className="flex-1 overflow-y-auto px-6">
-            <EventTimeline events={contact.events as Parameters<typeof EventTimeline>[0]['events']} />
+            <EventTimeline events={contact.events as unknown as Parameters<typeof EventTimeline>[0]['events']} />
           </div>
 
           {lastEvent && <ReplyBox sourceEventId={lastEvent.id} />}

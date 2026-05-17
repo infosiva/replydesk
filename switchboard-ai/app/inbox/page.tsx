@@ -27,7 +27,7 @@ export default async function InboxPage() {
 
       <div className="flex flex-1 overflow-hidden">
         <aside className="w-80 border-r border-white/10 overflow-y-auto py-2">
-          <ContactList contacts={contacts as Parameters<typeof ContactList>[0]['contacts']} />
+          <ContactList contacts={contacts as unknown as Parameters<typeof ContactList>[0]['contacts']} />
         </aside>
         <main className="flex-1 flex items-center justify-center text-gray-600 text-sm">
           Select a contact to view their timeline

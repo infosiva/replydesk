@@ -3,20 +3,18 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
 }
 
 model Business {
-  id            String    @id @default(cuid())
-  name          String
-  twilioNumber  String    @unique
-  emailInbox    String    @unique
-  officeStatus  Status    @default(OPEN)
-  systemPrompt  String    @db.Text
-  contacts      Contact[]
-  createdAt     DateTime  @default(now())
+  id           String    @id @default(cuid())
+  name         String
+  twilioNumber String    @unique
+  emailInbox   String    @unique
+  officeStatus Status    @default(OPEN)
+  systemPrompt String    @db.Text
+  contacts     Contact[]
+  createdAt    DateTime  @default(now())
 }
 
 model Contact {
@@ -34,18 +32,33 @@ model Contact {
 }
 
 model ContactEvent {
-  id         String     @id @default(cuid())
-  contactId  String
-  contact    Contact    @relation(fields: [contactId], references: [id])
-  type       EventType
-  direction  Direction
-  raw        String     @db.Text
-  aiDraft    String?    @db.Text
-  sentReply  String?    @db.Text
-  claimedBy  String?
-  createdAt  DateTime   @default(now())
+  id        String    @id @default(cuid())
+  contactId String
+  contact   Contact   @relation(fields: [contactId], references: [id])
+  type      EventType
+  direction Direction
+  raw       String    @db.Text
+  aiDraft   String?   @db.Text
+  sentReply String?   @db.Text
+  claimedBy String?
+  createdAt DateTime  @default(now())
 }
 
-enum Status    { OPEN CLOSED }
-enum EventType { CALL_INBOUND CALL_MISSED EMAIL_INBOUND SMS_INBOUND AI_REPLY HUMAN_REPLY }
-enum Direction { INBOUND OUTBOUND }
+enum Status {
+  OPEN
+  CLOSED
+}
+
+enum EventType {
+  CALL_INBOUND
+  CALL_MISSED
+  EMAIL_INBOUND
+  SMS_INBOUND
+  AI_REPLY
+  HUMAN_REPLY
+}
+
+enum Direction {
+  INBOUND
+  OUTBOUND
+}
