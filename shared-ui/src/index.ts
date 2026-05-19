@@ -84,3 +84,10 @@ export type { KVStore, AICacheOptions } from './lib/ai-cache'
 // Layout system
 export { LAYOUT_PRESETS, PROJECT_LAYOUTS } from './layout/layouts'
 export type { LayoutKey, LayoutConfig } from './layout/layouts'
+
+// Voice + Interview UI primitives (reusable across aicoachlab, tutiq, quizbytes)
+export { VoiceWave } from './components/VoiceWave'
+export { TypingIndicator as VoiceTypingIndicator } from './components/TypingIndicator'
+export { ScoreCounter } from './components/ScoreCounter'
+export { MicButton } from './components/MicButton'
+export { useVoiceRecognition } from './hooks/useVoiceRecognition'
