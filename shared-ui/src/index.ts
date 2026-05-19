@@ -64,6 +64,23 @@ export { default as GoogleAuthButton } from './auth/GoogleAuthButton'
 // Affiliate tracking
 export { useAffiliateTracker, getAffiliateRef, clearAffiliateRef, AffiliateTracker } from './auth/useAffiliate'
 
+// Auth shell (provider-agnostic — wire to Clerk/Supabase/NextAuth/custom)
+export { default as SignInModal } from './auth/SignInModal'
+export type { AuthProvider } from './auth/SignInModal'
+export { useCurrentUser, registerAuthAdapter } from './auth/useCurrentUser'
+export type { CurrentUser } from './auth/useCurrentUser'
+
+// AI chat primitives (Perplexity-style streaming + citations + follow-ups)
+export { default as StreamingMessage } from './chat/StreamingMessage'
+export type { Citation } from './chat/StreamingMessage'
+export { default as FollowUpChips } from './chat/FollowUpChips'
+export { default as ProgressStepper } from './chat/ProgressStepper'
+export type { Step, StepStatus } from './chat/ProgressStepper'
+
+// AI caching (model-layer KV cache — wraps any AI SDK call)
+export { createAICache, createMemoryStore } from './lib/ai-cache'
+export type { KVStore, AICacheOptions } from './lib/ai-cache'
+
 // Layout system
 export { LAYOUT_PRESETS, PROJECT_LAYOUTS } from './layout/layouts'
 export type { LayoutKey, LayoutConfig } from './layout/layouts'
