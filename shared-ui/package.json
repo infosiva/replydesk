@@ -1,15 +1,50 @@
 {
-  "name": "@siva/shared-ui",
-  "version": "1.0.0",
-  "private": true,
-  "main": "src/index.ts",
-  "types": "src/index.ts",
+  "name": "@infosiva/shared-ui",
+  "version": "1.2.0",
+  "description": "Shared UI components, auth, chatbot, and motion primitives for all siva's projects",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts --clean --external react --external next --external framer-motion",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "prepublishOnly": "npm run build"
+  },
   "peerDependencies": {
-    "react": ">=18",
-    "next": ">=14"
+    "framer-motion": ">=10",
+    "next": ">=14",
+    "react": ">=18"
   },
   "devDependencies": {
-    "@types/react": "^19",
+    "@fal-ai/client": "^1.10.1",
+    "@types/node": "^25.9.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vercel/kv": "^3.0.0",
+    "framer-motion": "^11.18.2",
+    "next": "^16.2.6",
+    "tsup": "^8.5.1",
     "typescript": "^5"
+  },
+  "dependencies": {
+    "lucide-react": "^1.16.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/infosiva/replydesk.git",
+    "directory": "shared-ui"
   }
 }
