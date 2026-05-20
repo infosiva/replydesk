@@ -6,7 +6,8 @@
 .env.development
 *.env
 .env.*
-!.env.example
+.env.local.example
+# never commit any .env file — including example templates with real-looking keys
 
 # IDE / OS
 .DS_Store
@@ -27,3 +28,4 @@ npm-debug.log*
 
 # Local settings with tokens
 .claude/settings.local.json
+affiliate-links.env
