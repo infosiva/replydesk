@@ -27,6 +27,7 @@ interface Options {
 }
 
 // Simple in-memory rate limiter (per serverless instance)
+// Key = IP + optional browser fingerprint (more robust than IP alone)
 const WINDOWS = new Map<string, { count: number; resetAt: number }>()
 
 function checkRate(ip: string, max: number): boolean {
@@ -84,9 +85,12 @@ respond EXACTLY: "I'm trained specifically for ${siteName}. For that question, t
 Keep all responses under 150 words. Be helpful but stay on-topic.`
 
   return async function POST(req: NextRequest) {
-    // Rate limit
+    // Rate limit — use IP + optional fingerprint for incognito resistance
     const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
-    if (checkRate(ip, maxPerHour)) {
+    // visitorId from @fingerprintjs/fingerprintjs (sent by client) — more robust than IP
+    const { messages, system, visitorId } = await req.json().catch(() => ({ messages: [], system: undefined, visitorId: undefined }))
+    const rateKey = visitorId ? `fp_${visitorId}` : `ip_${ip}`
+    if (checkRate(rateKey, maxPerHour)) {
       return NextResponse.json(
         { text: `You've reached the free limit of ${maxPerHour} messages/hour for ${siteName}. Sign up to unlock unlimited chat!` },
         { status: 200 } // 200 so UI shows it gracefully
@@ -94,7 +98,7 @@ Keep all responses under 150 words. Be helpful but stay on-topic.`
     }
 
     try {
-      const { messages, system } = await req.json()
+      // messages/system/visitorId already parsed above
 
       // Check last user message for obvious out-of-scope
       const lastUserMsg = messages?.findLast?.((m: { role: string; content: string }) => m.role === 'user')?.content ?? ''

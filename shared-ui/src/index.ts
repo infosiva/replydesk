@@ -93,3 +93,4 @@ export { MicButton } from './components/MicButton'
 export { useVoiceRecognition } from './hooks/useVoiceRecognition'
 
 // Shared chat route builder — import directly: import { createChatRoute } from '@siva/shared-ui/lib/createChatRoute'
+export { useFingerprint } from './hooks/useFingerprint'
