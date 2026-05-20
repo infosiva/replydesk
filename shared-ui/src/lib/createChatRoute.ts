@@ -91,10 +91,12 @@ Keep all responses under 150 words. Be helpful but stay on-topic.`
     const { messages, system, visitorId } = await req.json().catch(() => ({ messages: [], system: undefined, visitorId: undefined }))
     const rateKey = visitorId ? `fp_${visitorId}` : `ip_${ip}`
     if (checkRate(rateKey, maxPerHour)) {
-      return NextResponse.json(
-        { text: `You've reached the free limit of ${maxPerHour} messages/hour for ${siteName}. Sign up to unlock unlimited chat!` },
-        { status: 200 } // 200 so UI shows it gracefully
-      )
+      return NextResponse.json({
+        text: `✨ You've had a taste of what ${siteName} can do! Create a free account to unlock unlimited conversations — takes 10 seconds.`,
+        gated: true,
+        ctaLabel: 'Sign up free →',
+        ctaUrl: '/signup',
+      }, { status: 200 })
     }
 
     try {
