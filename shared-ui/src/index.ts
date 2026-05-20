@@ -91,3 +91,5 @@ export { TypingIndicator as VoiceTypingIndicator } from './components/TypingIndi
 export { ScoreCounter } from './components/ScoreCounter'
 export { MicButton } from './components/MicButton'
 export { useVoiceRecognition } from './hooks/useVoiceRecognition'
+
+// Shared chat route builder — import directly: import { createChatRoute } from '@siva/shared-ui/lib/createChatRoute'
