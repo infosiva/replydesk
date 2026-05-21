@@ -192,7 +192,8 @@ export default function BriefForm() {
             <button
               type="button"
               onClick={() => setStep(s => s - 1)}
-              className="px-5 py-2.5 rounded-xl border border-white/10 text-white/60 hover:text-white hover:border-white/20 text-sm transition"
+              className="px-5 py-2.5 rounded-xl border border-white/10 text-white/60 hover:text-white hover:border-white/20 text-sm btn-press"
+              style={{ transition: 'border-color 200ms, color 200ms, transform 160ms cubic-bezier(0.23,1,0.32,1)' }}
             >
               Back
             </button>
@@ -203,7 +204,8 @@ export default function BriefForm() {
               type="button"
               onClick={() => setStep(s => s + 1)}
               disabled={!canProceed()}
-              className="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-40 text-white text-sm font-medium transition"
+              className="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-40 text-white text-sm font-medium btn-press"
+              style={{ transition: 'background 200ms cubic-bezier(0.23,1,0.32,1), transform 160ms cubic-bezier(0.23,1,0.32,1)' }}
             >
               Continue →
             </button>
@@ -211,7 +213,8 @@ export default function BriefForm() {
             <button
               type="submit"
               disabled={loading || !form.brand || !form.topic || !form.audience}
-              className="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-40 text-white text-sm font-medium transition flex items-center gap-2"
+              className="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-40 text-white text-sm font-medium btn-press flex items-center gap-2"
+              style={{ transition: 'background 200ms cubic-bezier(0.23,1,0.32,1), transform 160ms cubic-bezier(0.23,1,0.32,1)' }}
             >
               {loading ? (
                 <>

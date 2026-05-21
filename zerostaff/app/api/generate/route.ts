@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supabase-server'
-import { generateAll } from '@/lib/generate'
+import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { enqueueJob } from '@/lib/queue'
 import { z } from 'zod'
 
 const BriefSchema = z.object({
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
       .eq('id', user.id)
       .single()
 
-    const tier = userData?.tier ?? 'free'
+    const tier = (userData?.tier ?? 'free') as 'free' | 'pro' | 'agency'
     const used = userData?.briefs_used_this_month ?? 0
     const limit = tier === 'free' ? 2 : tier === 'pro' ? 20 : Infinity
     const resetAt = userData?.briefs_reset_at ? new Date(userData.briefs_reset_at) : new Date()
@@ -41,7 +41,6 @@ export async function POST(request: NextRequest) {
 
     let currentUsed = used
     if (resetAt < monthAgo) {
-      // Reset monthly counter
       currentUsed = 0
       await supabase.from('users').update({ briefs_used_this_month: 0, briefs_reset_at: new Date().toISOString() }).eq('id', user.id)
     }
@@ -61,7 +60,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No workspace found' }, { status: 400 })
     }
 
-    // Create brief record
+    // Determine how many async jobs to enqueue
+    const jobTypes: Array<'text' | 'audio' | 'video'> = ['text']
+    if (tier === 'pro' || tier === 'agency') jobTypes.push('audio')
+    if (tier === 'agency') jobTypes.push('video')
+
+    // Create brief record with job count
     const { data: briefRecord, error: briefError } = await supabase
       .from('briefs')
       .insert({
@@ -73,6 +77,8 @@ export async function POST(request: NextRequest) {
         tone: brief.tone,
         keywords: brief.keywords,
         status: 'processing',
+        jobs_total: jobTypes.length,
+        jobs_done: 0,
       })
       .select('id')
       .single()
@@ -87,36 +93,13 @@ export async function POST(request: NextRequest) {
       .update({ briefs_used_this_month: currentUsed + 1 })
       .eq('id', user.id)
 
-    // Run generation (parallel Groq jobs)
-    const results = await generateAll(brief, tier as 'free' | 'pro' | 'agency')
+    // Enqueue async jobs
+    const jobPayload = { briefId: briefRecord.id, userId: user.id, tier, brief }
+    await Promise.all(jobTypes.map((type) => enqueueJob(type, jobPayload)))
 
-    // Save each asset
-    const serviceClient = createServiceRoleClient()
-    const assetInserts = Object.entries(results)
-      .filter(([, value]) => value !== undefined)
-      .map(([type, content]) => ({
-        brief_id: briefRecord.id,
-        type: camelToSnake(type),
-        content,
-      }))
-
-    if (assetInserts.length > 0) {
-      await serviceClient.from('assets').insert(assetInserts)
-    }
-
-    // Mark brief complete
-    await serviceClient
-      .from('briefs')
-      .update({ status: 'complete' })
-      .eq('id', briefRecord.id)
-
-    return NextResponse.json({ briefId: briefRecord.id })
+    return NextResponse.json({ briefId: briefRecord.id, queued: true, jobs: jobTypes })
   } catch (err) {
     console.error('Generate error:', err)
     return NextResponse.json({ error: 'Generation failed' }, { status: 500 })
   }
-}
-
-function camelToSnake(str: string): string {
-  return str.replace(/([A-Z])/g, '_$1').toLowerCase()
 }

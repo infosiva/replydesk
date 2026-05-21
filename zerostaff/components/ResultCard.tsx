@@ -80,19 +80,22 @@ export default function ResultCard({ title, icon, type, content, locked = false 
           <div className="flex items-center gap-2">
             <button
               onClick={handleCopy}
-              className="text-xs px-2.5 py-1 rounded-md border border-white/10 text-white/50 hover:text-white hover:border-white/20 transition"
+              className="text-xs px-2.5 py-1 rounded-md border border-white/10 text-white/50 hover:text-white hover:border-white/20 btn-press"
+              style={{ transition: 'border-color 160ms, color 160ms, transform 160ms cubic-bezier(0.23,1,0.32,1)' }}
             >
               {copied ? '✓ Copied' : 'Copy'}
             </button>
             <button
               onClick={handleDownload}
-              className="text-xs px-2.5 py-1 rounded-md border border-white/10 text-white/50 hover:text-white hover:border-white/20 transition"
+              className="text-xs px-2.5 py-1 rounded-md border border-white/10 text-white/50 hover:text-white hover:border-white/20 btn-press"
+              style={{ transition: 'border-color 160ms, color 160ms, transform 160ms cubic-bezier(0.23,1,0.32,1)' }}
             >
               Download
             </button>
             <button
               onClick={() => setExpanded(e => !e)}
-              className="text-xs px-2.5 py-1 rounded-md bg-white/5 text-white/50 hover:text-white transition"
+              className="text-xs px-2.5 py-1 rounded-md bg-white/5 text-white/50 hover:text-white btn-press"
+              style={{ transition: 'background 160ms, color 160ms, transform 160ms cubic-bezier(0.23,1,0.32,1)' }}
             >
               {expanded ? 'Collapse' : 'Expand'}
             </button>

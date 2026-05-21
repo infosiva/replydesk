@@ -36,7 +36,8 @@ export default async function DashboardPage() {
         </div>
         <Link
           href="/dashboard/new"
-          className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-sm font-medium transition"
+          className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-sm font-medium btn-press"
+          style={{ transition: 'background 200ms cubic-bezier(0.23,1,0.32,1), transform 160ms cubic-bezier(0.23,1,0.32,1)' }}
         >
           + New brief
         </Link>
@@ -47,7 +48,7 @@ export default async function DashboardPage() {
           <div className="text-4xl mb-4">✨</div>
           <h2 className="text-lg font-semibold text-white mb-2">No briefs yet</h2>
           <p className="text-sm text-white/50 mb-6">Submit your first brief and get 8 content assets in under 60 seconds.</p>
-          <Link href="/dashboard/new" className="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-sm font-medium transition">
+          <Link href="/dashboard/new" className="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-sm font-medium btn-press" style={{ transition: 'background 200ms cubic-bezier(0.23,1,0.32,1), transform 160ms cubic-bezier(0.23,1,0.32,1)' }}>
             Create first brief
           </Link>
         </div>

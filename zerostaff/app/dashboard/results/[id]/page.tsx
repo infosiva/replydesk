@@ -1,36 +1,83 @@
-import { createServerSupabaseClient } from '@/lib/supabase-server'
-import { redirect, notFound } from 'next/navigation'
+'use client'
+
+import { useEffect, useState } from 'react'
+import { createClient } from '@supabase/supabase-js'
+import { notFound } from 'next/navigation'
 import DownloadCenter from '@/components/DownloadCenter'
+import JobProgress from '@/components/JobProgress'
 import Link from 'next/link'
 import type { DbAsset, Tier } from '@/lib/types'
+import { use } from 'react'
 
-export default async function ResultsPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params
-  const supabase = await createServerSupabaseClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+interface Brief {
+  id: string
+  topic: string
+  brand: string
+  tone: string
+  status: string
+  keywords: string[]
+  jobs_done: number
+  jobs_total: number
+}
 
-  const { data: brief } = await supabase
-    .from('briefs')
-    .select('*')
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .single()
+function ResultsContent({ id }: { id: string }) {
+  const [brief, setBrief] = useState<Brief | null>(null)
+  const [assets, setAssets] = useState<DbAsset[]>([])
+  const [tier, setTier] = useState<Tier>('free')
+  const [loading, setLoading] = useState(true)
+  const [notFoundError, setNotFoundError] = useState(false)
 
-  if (!brief) notFound()
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  )
 
-  const { data: assets } = await supabase
-    .from('assets')
-    .select('*')
-    .eq('brief_id', id)
+  useEffect(() => {
+    async function load() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        window.location.href = '/login'
+        return
+      }
 
-  const { data: userData } = await supabase
-    .from('users')
-    .select('tier')
-    .eq('id', user.id)
-    .single()
+      const [briefRes, assetsRes, userRes] = await Promise.all([
+        supabase.from('briefs').select('*').eq('id', id).eq('user_id', user.id).single(),
+        supabase.from('assets').select('*').eq('brief_id', id),
+        supabase.from('users').select('tier').eq('id', user.id).single(),
+      ])
 
-  const tier = (userData?.tier ?? 'free') as Tier
+      if (!briefRes.data) {
+        setNotFoundError(true)
+        return
+      }
+
+      setBrief(briefRes.data as Brief)
+      setAssets((assetsRes.data ?? []) as DbAsset[])
+      setTier(((userRes.data?.tier ?? 'free') as Tier))
+      setLoading(false)
+    }
+    load()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id])
+
+  function handleComplete() {
+    // Reload assets once complete
+    supabase.from('assets').select('*').eq('brief_id', id).then(({ data }) => {
+      if (data) setAssets(data as DbAsset[])
+    })
+    setBrief((prev) => prev ? { ...prev, status: 'complete' } : prev)
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-24">
+        <div className="w-6 h-6 rounded-full border-2 border-white/20 border-t-white/60 animate-spin" />
+      </div>
+    )
+  }
+
+  if (notFoundError) return notFound()
+  if (!brief) return null
 
   return (
     <div>
@@ -63,16 +110,18 @@ export default async function ResultsPage({ params }: { params: Promise<{ id: st
           )}
         </div>
         <div className="text-right">
-          <p className="text-xs text-white/30">{assets?.length ?? 0} assets generated</p>
+          <p className="text-xs text-white/30">{assets.length} assets generated</p>
         </div>
       </div>
 
       {brief.status === 'processing' ? (
-        <div className="glass p-12 text-center">
-          <div className="w-8 h-8 rounded-full border-2 border-purple-500/30 border-t-purple-500 animate-spin mx-auto mb-4" />
-          <p className="text-white/60">Generating your content…</p>
-          <p className="text-sm text-white/30 mt-1">This usually takes 30–60 seconds</p>
-        </div>
+        <JobProgress
+          briefId={brief.id}
+          initialDone={brief.jobs_done}
+          initialTotal={brief.jobs_total}
+          initialStatus={brief.status}
+          onComplete={handleComplete}
+        />
       ) : brief.status === 'error' ? (
         <div className="glass p-8 text-center border-red-500/20">
           <p className="text-red-400 font-medium">Generation failed</p>
@@ -82,10 +131,10 @@ export default async function ResultsPage({ params }: { params: Promise<{ id: st
           </Link>
         </div>
       ) : (
-        <DownloadCenter assets={(assets ?? []) as DbAsset[]} tier={tier} />
+        <DownloadCenter assets={assets} tier={tier} />
       )}
 
-      {tier === 'free' && (
+      {tier === 'free' && brief.status === 'complete' && (
         <div className="mt-8 glass p-5 border-purple-500/20 flex items-center justify-between">
           <div>
             <p className="text-sm font-medium text-white">Unlock all 8 assets</p>
@@ -98,4 +147,9 @@ export default async function ResultsPage({ params }: { params: Promise<{ id: st
       )}
     </div>
   )
+}
+
+export default function ResultsPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params)
+  return <ResultsContent id={id} />
 }

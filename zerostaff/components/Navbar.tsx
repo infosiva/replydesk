@@ -27,7 +27,7 @@ export default function Navbar({ email, tier = 'free' }: NavbarProps) {
   }
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-white/[0.06]" style={{ background: 'rgba(8,7,18,0.85)', backdropFilter: 'blur(12px)' }}>
+    <nav className="sticky top-0 z-50 border-b border-white/[0.06]" style={{ background: 'rgba(5,4,15,0.80)', backdropFilter: 'blur(20px)' }}>
       <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
         <Link href="/dashboard" className="flex items-center gap-2">
           <span className="text-lg font-bold text-white">Zero<span className="text-purple-400">Staff</span></span>
