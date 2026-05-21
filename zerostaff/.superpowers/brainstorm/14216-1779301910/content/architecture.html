@@ -1,0 +1,142 @@
+<h2>Platform Architecture — Full System</h2>
+<p class="subtitle">3-layer system: Content Engine → Delivery Layer → Agency OS</p>
+
+<div class="section">
+  <div class="label">System Overview</div>
+  <div style="margin-top:16px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:24px;font-family:monospace;font-size:12px;line-height:2">
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:24px">
+      <div style="background:rgba(249,115,22,0.08);border:1px solid rgba(249,115,22,0.25);border-radius:10px;padding:14px">
+        <div style="color:#f97316;font-weight:700;font-size:11px;letter-spacing:1px;margin-bottom:10px">LAYER 1 — INTAKE</div>
+        <div style="color:rgba(255,255,255,0.8);font-size:12px;line-height:1.8">
+          Brief Form<br>
+          Brand Profile<br>
+          Audience targeting<br>
+          Tone + style config<br>
+          Topic / keyword
+        </div>
+      </div>
+      <div style="background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.25);border-radius:10px;padding:14px">
+        <div style="color:#a855f7;font-weight:700;font-size:11px;letter-spacing:1px;margin-bottom:10px">LAYER 2 — ENGINE</div>
+        <div style="color:rgba(255,255,255,0.8);font-size:12px;line-height:1.8">
+          Groq (text gen)<br>
+          ElevenLabs (TTS→MP3)<br>
+          fal.ai (video scenes)<br>
+          Job queue (BullMQ)<br>
+          Progress streaming
+        </div>
+      </div>
+      <div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.25);border-radius:10px;padding:14px">
+        <div style="color:#10b981;font-weight:700;font-size:11px;letter-spacing:1px;margin-bottom:10px">LAYER 3 — DELIVERY</div>
+        <div style="color:rgba(255,255,255,0.8);font-size:12px;line-height:1.8">
+          Creator dashboard<br>
+          Client portal (WL)<br>
+          Download centre<br>
+          Agency reseller OS<br>
+          Lead gen package
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:center;color:rgba(255,255,255,0.3);margin-bottom:16px;font-size:11px">── GENERATION PIPELINE ──</div>
+
+    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center">
+      <div style="background:rgba(249,115,22,0.12);border:1px solid rgba(249,115,22,0.3);border-radius:8px;padding:6px 12px;font-size:11px;color:#fb923c">Brief submitted</div>
+      <div style="color:rgba(255,255,255,0.3)">→</div>
+      <div style="background:rgba(168,85,247,0.12);border:1px solid rgba(168,85,247,0.3);border-radius:8px;padding:6px 12px;font-size:11px;color:#c084fc">7 parallel jobs queued</div>
+      <div style="color:rgba(255,255,255,0.3)">→</div>
+      <div style="background:rgba(168,85,247,0.12);border:1px solid rgba(168,85,247,0.3);border-radius:8px;padding:6px 12px;font-size:11px;color:#c084fc">Groq generates text</div>
+      <div style="color:rgba(255,255,255,0.3)">→</div>
+      <div style="background:rgba(168,85,247,0.12);border:1px solid rgba(168,85,247,0.3);border-radius:8px;padding:6px 12px;font-size:11px;color:#c084fc">ElevenLabs → MP3</div>
+      <div style="color:rgba(255,255,255,0.3)">→</div>
+      <div style="background:rgba(168,85,247,0.12);border:1px solid rgba(168,85,247,0.3);border-radius:8px;padding:6px 12px;font-size:11px;color:#c084fc">fal.ai → video</div>
+      <div style="color:rgba(255,255,255,0.3)">→</div>
+      <div style="background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);border-radius:8px;padding:6px 12px;font-size:11px;color:#34d399">Results ready → notify</div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:24px">
+  <div class="label">8 Outputs Per Brief</div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px">
+    <div style="background:rgba(249,115,22,0.06);border:1px solid rgba(249,115,22,0.2);border-radius:10px;padding:12px;text-align:center">
+      <div style="font-size:22px">📝</div>
+      <div style="font-size:12px;font-weight:700;color:white;margin-top:6px">SEO Blog</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px">1,200 words</div>
+    </div>
+    <div style="background:rgba(251,146,60,0.06);border:1px solid rgba(251,146,60,0.2);border-radius:10px;padding:12px;text-align:center">
+      <div style="font-size:22px">🎙️</div>
+      <div style="font-size:12px;font-weight:700;color:white;margin-top:6px">Podcast MP3</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px">ElevenLabs TTS</div>
+    </div>
+    <div style="background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:12px;text-align:center">
+      <div style="font-size:22px">🎬</div>
+      <div style="font-size:12px;font-weight:700;color:white;margin-top:6px">Faceless Video</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px">fal.ai scenes</div>
+    </div>
+    <div style="background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.2);border-radius:10px;padding:12px;text-align:center">
+      <div style="font-size:22px">💼</div>
+      <div style="font-size:12px;font-weight:700;color:white;margin-top:6px">LinkedIn Posts</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px">3 angles</div>
+    </div>
+    <div style="background:rgba(168,85,247,0.06);border:1px solid rgba(168,85,247,0.2);border-radius:10px;padding:12px;text-align:center">
+      <div style="font-size:22px">✉️</div>
+      <div style="font-size:12px;font-weight:700;color:white;margin-top:6px">Email Sequence</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px">5-email nurture</div>
+    </div>
+    <div style="background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.2);border-radius:10px;padding:12px;text-align:center">
+      <div style="font-size:22px">✂️</div>
+      <div style="font-size:12px;font-weight:700;color:white;margin-top:6px">Short Clips</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px">10 TikTok captions</div>
+    </div>
+    <div style="background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:10px;padding:12px;text-align:center">
+      <div style="font-size:22px">🎯</div>
+      <div style="font-size:12px;font-weight:700;color:white;margin-top:6px">Lead Gen Pack</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px">DMs + cold email</div>
+    </div>
+    <div style="background:rgba(236,72,153,0.06);border:1px solid rgba(236,72,153,0.2);border-radius:10px;padding:12px;text-align:center">
+      <div style="font-size:22px">📊</div>
+      <div style="font-size:12px;font-weight:700;color:white;margin-top:6px">Client Report</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px">Strategy + calendar</div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:24px">
+  <div class="label">3 User Tiers</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:12px">
+    <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:16px">
+      <div style="font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:1px;font-weight:700">FREE</div>
+      <div style="font-size:18px;font-weight:800;color:white;margin:6px 0">$0</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.6);line-height:1.8">2 briefs/mo<br>Text outputs only<br>No audio/video<br>Watermarked report</div>
+    </div>
+    <div style="background:rgba(168,85,247,0.06);border:1px solid rgba(168,85,247,0.3);border-radius:10px;padding:16px">
+      <div style="font-size:11px;color:#a855f7;letter-spacing:1px;font-weight:700">PRO</div>
+      <div style="font-size:18px;font-weight:800;color:white;margin:6px 0">$99/mo</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.6);line-height:1.8">20 briefs/mo<br>Real MP3 podcast<br>Faceless video<br>Lead gen pack<br>Client portal</div>
+    </div>
+    <div style="background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.3);border-radius:10px;padding:16px">
+      <div style="font-size:11px;color:#10b981;letter-spacing:1px;font-weight:700">AGENCY</div>
+      <div style="font-size:18px;font-weight:800;color:white;margin:6px 0">$199/mo</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.6);line-height:1.8">Unlimited briefs<br>White-label portal<br>Sub-accounts (clients)<br>Run on behalf mode<br>API access<br>Custom domain</div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:24px">
+  <div class="label">Tech Stack</div>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px">
+    <span style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:5px 14px;font-size:12px;color:rgba(255,255,255,0.8)">Next.js 15</span>
+    <span style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:5px 14px;font-size:12px;color:rgba(255,255,255,0.8)">Tailwind CSS</span>
+    <span style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:5px 14px;font-size:12px;color:rgba(255,255,255,0.8)">Groq (llama-3.3-70b)</span>
+    <span style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:5px 14px;font-size:12px;color:rgba(255,255,255,0.8)">ElevenLabs TTS</span>
+    <span style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:5px 14px;font-size:12px;color:rgba(255,255,255,0.8)">fal.ai Kling video</span>
+    <span style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:5px 14px;font-size:12px;color:rgba(255,255,255,0.8)">Supabase (DB + Auth)</span>
+    <span style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:5px 14px;font-size:12px;color:rgba(255,255,255,0.8)">Upstash (job queue)</span>
+    <span style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:5px 14px;font-size:12px;color:rgba(255,255,255,0.8)">Stripe (billing)</span>
+    <span style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:5px 14px;font-size:12px;color:rgba(255,255,255,0.8)">Vercel (deploy)</span>
+    <span style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:5px 14px;font-size:12px;color:rgba(255,255,255,0.8)">R2 / S3 (file storage)</span>
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top:24px">Looks good? Confirm and I'll show the dashboard wireframe next.</p>
