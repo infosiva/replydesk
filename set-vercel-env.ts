@@ -2,29 +2,232 @@
 /**
  * set-vercel-env.ts
  *
- * Syncs a shared set of env vars to multiple Vercel projects in one shot.
- * Uses the Vercel REST API — no CLI login needed, just a token.
+ * Syncs shared env vars to Vercel projects across TWO accounts:
+ *   - infosiva      (VERCEL_TOKEN)     — existing projects, bug fixes
+ *   - sivaprakasam  (VERCEL_TOKEN_NEW) — all new projects go here
  *
  * !! WHEN ADDING A NEW VERCEL PROJECT !!
- *   1. Add its name to the PROJECTS array below
- *   2. Run: VERCEL_TOKEN=vcp_01iJOUQCKQGfvLVCL9NRWUmDdk9uU1wpOqqjxYXQ6HkwaEVHJx2u1D9p npx tsx set-vercel-env.ts
- *   Safe to re-run anytime — deletes old values before writing, no duplicates.
+ *   - Add to SIVAPRAKASAM_PROJECTS array below
+ *
+ * Run:
+ *   sync-vercel-env        → both accounts
+ *   sync-vercel-env-new    → sivaprakasam account only
+ *
+ * Safe to re-run anytime — deletes old values before writing, no duplicates.
  */
 
 import { readFileSync, existsSync } from 'fs'
 import { resolve, dirname } from 'path'
 import { fileURLToPath } from 'url'
 
-const TOKEN = process.env.VERCEL_TOKEN
-if (!TOKEN) {
-  console.error('Set VERCEL_TOKEN=xxx before running')
+const TOKEN_INFOSIVA     = process.env.VERCEL_TOKEN
+const TOKEN_SIVAPRAKASAM = process.env.VERCEL_TOKEN_NEW
+
+if (!TOKEN_INFOSIVA && !TOKEN_SIVAPRAKASAM) {
+  console.error('Set VERCEL_TOKEN (infosiva) and/or VERCEL_TOKEN_NEW (sivaprakasam) before running')
   process.exit(1)
 }
 
-// ── Load SHARED_VARS from .env.shared (single source of truth) ───────────────
-// Keys to push to ALL projects — project-specific keys (VPS_*, OLLAMA_HOST) excluded
-const SHARED_KEYS = ['GROQ_API_KEY', 'GROQ_API_KEY_1', 'GEMINI_API_KEY', 'CEREBRAS_API_KEY', 'NVIDIA_API_KEY', 'KIMI_API_KEY', 'ANTHROPIC_API_KEY', 'EDGE_CONFIG', 'RESEND_API_KEY']
+// ── Account config ─────────────────────────────────────────────────────────────
+const INFOSIVA_TEAM_ID     = 'team_2XHm064mWA86v38GDJ01Veli'
+const SIVAPRAKASAM_TEAM_ID = 'team_o4yd8mPfnYYzbpPwlbdxNnWE'
 
+// ── Shared keys synced to ALL projects on both accounts ───────────────────────
+const SHARED_KEYS = [
+  'GROQ_API_KEY', 'GROQ_API_KEY_1', 'GEMINI_API_KEY', 'CEREBRAS_API_KEY',
+  'NVIDIA_API_KEY', 'KIMI_API_KEY', 'ANTHROPIC_API_KEY', 'EDGE_CONFIG', 'RESEND_API_KEY',
+]
+
+// ── Project-specific env vars ─────────────────────────────────────────────────
+const PROJECT_SPECIFIC: Record<string, Record<string, string>> = {
+  // ── infosiva ─────────────────────────────────────────────────────────────────
+  'ai-resume-builder': {
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY ?? '',
+    STRIPE_PRICE_ID: 'price_1TYK4tQmuhMl0F31r1z4t16K',
+    NEXT_PUBLIC_AUTH_API_URL: 'http://31.97.56.148:3110',
+  },
+  'social-media-calendar': {
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY ?? '',
+    STRIPE_PRICE_ID: process.env.STRIPE_PRICE_ID_DRAFTCAL ?? '',
+  },
+  'language-learning-bot': {
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY ?? '',
+    STRIPE_PRICE_ID: process.env.STRIPE_PRICE_ID_SPEAKIQ ?? '',
+  },
+  'kwizzo': {
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY ?? '',
+    STRIPE_PRICE_ID: process.env.STRIPE_PRICE_ID_KWIZZO ?? '',
+  },
+  'questly': {
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY ?? '',
+    STRIPE_PRICE_ID: process.env.STRIPE_PRICE_ID_QUIZBITES ?? '',
+  },
+  'ai-toolkit': {
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY ?? '',
+    STRIPE_PRICE_ID_AI_TOOLKIT: process.env.STRIPE_PRICE_ID_AI_TOOLKIT ?? '',
+  },
+  'nudge': {
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY ?? '',
+    STRIPE_PRICE_ID: process.env.STRIPE_PRICE_ID_TUTIQ ?? '',
+  },
+  'ai-travel-planner': {
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY ?? '',
+    STRIPE_PRICE_ID: process.env.STRIPE_PRICE_ID_ROAMPLAN ?? '',
+    NEXT_PUBLIC_AUTH_API_URL: 'http://31.97.56.148:3110',
+  },
+  'ai-investment-tracker': {
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY ?? '',
+    STRIPE_PRICE_ID: process.env.STRIPE_PRICE_ID_TRACKWEALTH ?? '',
+  },
+  'agenttrace': {
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY ?? '',
+    STRIPE_PRICE_ID: process.env.STRIPE_PRICE_ID_AGENTTRACE ?? '',
+  },
+  'tradespot':   { NEXT_PUBLIC_AUTH_API_URL: 'http://31.97.56.148:3110' },
+  'health-tracker': { NEXT_PUBLIC_AUTH_API_URL: 'http://31.97.56.148:3110' },
+  'hub': {
+    DASHBOARD_PASSWORD: process.env.DASHBOARD_PASSWORD ?? 'siva2026',
+    VERCEL_TOKEN: process.env.VERCEL_TOKEN ?? '',
+    TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN ?? '',
+    TELEGRAM_CHAT_ID: process.env.TELEGRAM_CHAT_ID ?? '',
+    CRON_SECRET: process.env.CRON_SECRET ?? '',
+  },
+  // ── sivaprakasam ─────────────────────────────────────────────────────────────
+  'zerostaff': {
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY ?? '',
+    STRIPE_PRICE_ID: process.env.STRIPE_PRICE_ID_ZEROSTAFF ?? '',
+    NEXT_PUBLIC_AUTH_API_URL: 'http://31.97.56.148:3110',
+  },
+  'clipforge-ai': {
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY ?? '',
+    STRIPE_PRICE_ID: process.env.STRIPE_PRICE_ID_CLIPFORGE ?? '',
+    UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL ?? '',
+    UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN ?? '',
+  },
+  'aicoachlab': {
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY ?? '',
+    STRIPE_PRICE_ID: process.env.STRIPE_PRICE_ID_AICOACHLAB ?? '',
+  },
+  'mandirates': {
+    NEXT_PUBLIC_AUTH_API_URL: 'http://31.97.56.148:3110',
+  },
+  // ── migrated to sivaprakasam 2026-05-23 ──────────────────────────────────────
+  'neuralos': {
+    NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET ?? '',
+    NEXTAUTH_URL: 'https://neuralagent.app',
+    DATABASE_URL: process.env.NEURALOS_DATABASE_URL ?? '',
+  },
+  'pixelforge': {
+    FAL_KEY: process.env.FAL_KEY ?? '',
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY ?? '',
+    STRIPE_PRICE_ID: process.env.STRIPE_PRICE_ID_PIXELFORGE ?? '',
+  },
+  'invoicemint': {
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY ?? '',
+  },
+  'protoforge': {
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY ?? '',
+  },
+  'rideflow': {},
+  'weekendai': {},
+  'meetscribe': {},
+  'voicejournal': {},
+  'pdfideas': {},
+  'complybuddy': { NEXT_PUBLIC_AUTH_API_URL: 'http://31.97.56.148:3110' },
+}
+
+// ── Project lists ─────────────────────────────────────────────────────────────
+
+// infosiva account — existing projects + bug fixes
+const INFOSIVA_PROJECTS = [
+  'nudge',                  // tutiq.app
+  'kwizzo',                 // kwizzo.app
+  'questly',                // quizbites.app
+  'ai-resume-builder',      // resumevault.app
+  'tradespot',              // anylocal.app
+  'social-media-calendar',  // draftcal.app
+  'ai-investment-tracker',  // trackwealth.app
+  'ai-travel-planner',      // roamplan.app
+  'language-learning-bot',  // speakiq.app
+  'agenttrace',             // agentlogs.app
+  'ai-social-content',
+  'ai-resume-screener',
+  'ai-voice-home',
+  'yt-portal',
+  'idea-agent',
+  'ai-toolkit',             // aitoolkit.app
+  'health-tracker',         // myvitals.app
+  'hub',                    // ops dashboard
+]
+
+// sivaprakasam account — ALL new projects go here
+const SIVAPRAKASAM_PROJECTS = [
+  'zerostaff',              // zerostaff.app
+  'clipforge-ai',           // clipforge.ai
+  'aicoachlab',             // aicoachlab.app
+  'mandirates',             // mandirates.app
+  // ↓ migrated 2026-05-23
+  'rideflow',               // rideflow.app
+  'neuralos',               // neuralagent.app
+  'protoforge',             // protofast.app
+  'weekendai',              // weekendai.app
+  'pixelforge',             // arcadeforge.app
+  'meetscribe',             // meetscribe.app
+  'voicejournal',           // voicejournal.app
+  'pdfideas',               // pdfideas.app
+  'complybuddy',            // complyscan.app
+  'invoicemint',            // invoicemint.app
+]
+
+// ── Environments ──────────────────────────────────────────────────────────────
+const TARGETS: Array<'production' | 'preview' | 'development'> = ['production', 'preview', 'development']
+
+// ── Vercel API helpers ────────────────────────────────────────────────────────
+const BASE = 'https://api.vercel.com'
+
+function makeHeaders(token: string) {
+  return { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
+}
+
+function projectUrl(project: string, path: string, teamId?: string) {
+  const q = teamId ? `?teamId=${teamId}` : ''
+  return `${BASE}${path.replace('{project}', project)}${q}`
+}
+
+async function listEnvs(project: string, token: string, teamId?: string) {
+  const url = projectUrl(project, '/v9/projects/{project}/env', teamId)
+  const r = await fetch(url, { headers: makeHeaders(token) })
+  if (!r.ok) {
+    const e = await r.text()
+    throw new Error(`listEnvs ${project}: ${r.status} ${e.slice(0, 200)}`)
+  }
+  const data: any = await r.json()
+  return (data.envs ?? []) as Array<{ id: string; key: string; target: string[] }>
+}
+
+async function deleteEnv(project: string, envId: string, token: string, teamId?: string) {
+  const url = projectUrl(project, `/v9/projects/{project}/env/${envId}`, teamId)
+  const r = await fetch(url, { method: 'DELETE', headers: makeHeaders(token) })
+  if (!r.ok) {
+    const e = await r.text()
+    console.warn(`  ⚠ delete ${envId}: ${r.status} ${e.slice(0, 100)}`)
+  }
+}
+
+async function createEnv(project: string, key: string, value: string, token: string, teamId?: string) {
+  const url = projectUrl(project, '/v10/projects/{project}/env', teamId)
+  const r = await fetch(url, {
+    method: 'POST',
+    headers: makeHeaders(token),
+    body: JSON.stringify({ key, value, type: 'encrypted', target: TARGETS }),
+  })
+  if (!r.ok) {
+    const e = await r.text()
+    throw new Error(`createEnv ${project}/${key}: ${r.status} ${e.slice(0, 200)}`)
+  }
+}
+
+// ── Load .env.shared ──────────────────────────────────────────────────────────
 function loadSharedEnv(): Record<string, string> {
   const envPath = resolve(dirname(fileURLToPath(import.meta.url)), '.env.shared')
   if (!existsSync(envPath)) {
@@ -44,109 +247,79 @@ function loadSharedEnv(): Record<string, string> {
   return vars
 }
 
-const SHARED_VARS: Record<string, string> = loadSharedEnv()
-console.log(`Loaded ${Object.keys(SHARED_VARS).length} vars from .env.shared`)
+const SHARED_VARS = loadSharedEnv()
+console.log(`Loaded ${Object.keys(SHARED_VARS).length} shared vars from .env.shared`)
 
-// ── Projects to update (Vercel project name or ID) ────────────────────────────
-// These are the names shown in your Vercel dashboard
-const PROJECTS = [
-  'nudge',                  // tutiq.app
-  'kwizzo',                 // kwizzo.app
-  'questly',                // quizbites.app
-  'complybuddy',            // complybuddy-y3lj4k0nv-infosivas-projects.vercel.app
-  'ai-resume-builder',      // resumevault.app
-  'tradespot',              // anylocal.app
-  'social-media-calendar',  // social-media-calendar.vercel.app
-  'ai-investment-tracker',  // wealthpilot.app
-  'ai-travel-planner',      // wanderai.app
-  'language-learning-bot',  // speakfast.app
-  'agenttrace',             // agenttrace-omoyn0yms-infosivas-projects.vercel.app
-  'ai-social-content',      // ai-social-content.vercel.app
-  'ai-resume-screener',     // ai-resume-screener.vercel.app
-  'ai-voice-home',          // ai-voice-home.vercel.app
-  'yt-portal',              // yt-portal.vercel.app
-  'idea-agent',             // idea-agent.vercel.app
-  'meetscribe',             // meetscribe.vercel.app
-  'weekendai',              // weekendai.vercel.app
-  'pdfideas',               // pdfideas.vercel.app
-]
+// ── Sync one project ──────────────────────────────────────────────────────────
+async function syncProject(project: string, token: string, teamId?: string) {
+  const account = teamId === SIVAPRAKASAM_TEAM_ID ? '[sivaprakasam]' : '[infosiva]'
+  console.log(`\n▶ ${project} ${account}`)
 
-// ── Environments to set vars in ───────────────────────────────────────────────
-const TARGETS: Array<'production' | 'preview' | 'development'> = ['production', 'preview', 'development']
+  const existing = await listEnvs(project, token, teamId)
 
-// ── Vercel API helpers ────────────────────────────────────────────────────────
-const BASE = 'https://api.vercel.com'
-const headers = { Authorization: `Bearer ${TOKEN}`, 'Content-Type': 'application/json' }
-
-async function listEnvs(project: string): Promise<Array<{ id: string; key: string; target: string[] }>> {
-  const r = await fetch(`${BASE}/v9/projects/${project}/env`, { headers })
-  if (!r.ok) {
-    const e = await r.text()
-    throw new Error(`listEnvs ${project}: ${r.status} ${e.slice(0, 200)}`)
+  for (const [key, value] of Object.entries(SHARED_VARS)) {
+    for (const e of existing.filter(e => e.key === key)) {
+      await deleteEnv(project, e.id, token, teamId)
+    }
+    await createEnv(project, key, value, token, teamId)
+    console.log(`  ✓ ${key} (shared)`)
   }
-  const data: any = await r.json()
-  return data.envs ?? []
-}
 
-async function deleteEnv(project: string, envId: string) {
-  const r = await fetch(`${BASE}/v9/projects/${project}/env/${envId}`, { method: 'DELETE', headers })
-  if (!r.ok) {
-    const e = await r.text()
-    console.warn(`  ⚠ delete ${envId}: ${r.status} ${e.slice(0, 100)}`)
-  }
-}
-
-async function createEnv(project: string, key: string, value: string) {
-  const r = await fetch(`${BASE}/v10/projects/${project}/env`, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({ key, value, type: 'encrypted', target: TARGETS }),
-  })
-  if (!r.ok) {
-    const e = await r.text()
-    throw new Error(`createEnv ${project}/${key}: ${r.status} ${e.slice(0, 200)}`)
+  const specific = PROJECT_SPECIFIC[project] ?? {}
+  for (const [key, value] of Object.entries(specific)) {
+    if (!value) { console.log(`  ⊘ ${key} (empty — skipping)`); continue }
+    for (const e of existing.filter(e => e.key === key)) {
+      await deleteEnv(project, e.id, token, teamId)
+    }
+    await createEnv(project, key, value, token, teamId)
+    console.log(`  ✓ ${key} (project-specific)`)
   }
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
-async function syncProject(project: string) {
-  console.log(`\n▶ ${project}`)
-
-  // Fetch existing envs
-  const existing = await listEnvs(project)
-
-  for (const [key, value] of Object.entries(SHARED_VARS)) {
-    // Delete any existing entries for this key (all targets)
-    const old = existing.filter(e => e.key === key)
-    for (const e of old) {
-      await deleteEnv(project, e.id)
-    }
-
-    // Create fresh
-    await createEnv(project, key, value)
-    console.log(`  ✓ ${key}`)
-  }
-}
-
 async function main() {
-  console.log(`Syncing ${Object.keys(SHARED_VARS).length} vars → ${PROJECTS.length} projects`)
+  const results: { project: string; ok: boolean; account: string; error?: string }[] = []
 
-  const results: { project: string; ok: boolean; error?: string }[] = []
-
-  for (const project of PROJECTS) {
-    try {
-      await syncProject(project)
-      results.push({ project, ok: true })
-    } catch (e: any) {
-      console.error(`  ✗ ${e.message}`)
-      results.push({ project, ok: false, error: e.message })
+  // Sync infosiva account projects
+  if (TOKEN_INFOSIVA) {
+    console.log(`\n═══ infosiva (${INFOSIVA_TEAM_ID}) — ${INFOSIVA_PROJECTS.length} projects ═══`)
+    for (const project of INFOSIVA_PROJECTS) {
+      try {
+        await syncProject(project, TOKEN_INFOSIVA, INFOSIVA_TEAM_ID)
+        results.push({ project, ok: true, account: 'infosiva' })
+      } catch (e: any) {
+        console.error(`  ✗ ${e.message}`)
+        results.push({ project, ok: false, account: 'infosiva', error: e.message })
+      }
     }
+  } else {
+    console.log('\n⚠ VERCEL_TOKEN not set — skipping infosiva projects')
+  }
+
+  // Sync sivaprakasam account projects
+  if (TOKEN_SIVAPRAKASAM) {
+    console.log(`\n═══ sivaprakasam (${SIVAPRAKASAM_TEAM_ID}) — ${SIVAPRAKASAM_PROJECTS.length} projects ═══`)
+    for (const project of SIVAPRAKASAM_PROJECTS) {
+      try {
+        await syncProject(project, TOKEN_SIVAPRAKASAM, SIVAPRAKASAM_TEAM_ID)
+        results.push({ project, ok: true, account: 'sivaprakasam' })
+      } catch (e: any) {
+        console.error(`  ✗ ${e.message}`)
+        results.push({ project, ok: false, account: 'sivaprakasam', error: e.message })
+      }
+    }
+  } else {
+    console.log('\n⚠ VERCEL_TOKEN_NEW not set — skipping sivaprakasam projects')
   }
 
   console.log('\n── Summary ───────────────────────────────────')
   for (const r of results) {
-    console.log(r.ok ? `  ✅ ${r.project}` : `  ❌ ${r.project} — ${r.error}`)
+    const tag = r.account === 'sivaprakasam' ? '[sivaprakasam]' : '[infosiva]'
+    console.log(r.ok ? `  ✅ ${tag} ${r.project}` : `  ❌ ${tag} ${r.project} — ${r.error}`)
   }
+
+  const failed = results.filter(r => !r.ok)
+  if (failed.length) process.exit(1)
 }
 
 main()
