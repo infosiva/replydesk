@@ -1,29 +1,29 @@
-import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { auth } from '@/lib/auth'
+import { db } from '@/lib/db'
+import { threads, messages, briefs } from '@/lib/schema'
+import { eq } from 'drizzle-orm'
 import { redirect, notFound } from 'next/navigation'
 import MessageThread from '@/components/MessageThread'
 import Link from 'next/link'
 
 export default async function ThreadPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const supabase = await createServerSupabaseClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+  const session = await auth()
+  if (!session?.user?.id) redirect('/login')
 
-  const { data: thread } = await supabase
-    .from('threads')
-    .select('*, briefs(topic, brand)')
-    .eq('id', id)
-    .single()
-
+  const [thread] = await db.select().from(threads).where(eq(threads.id, id))
   if (!thread) notFound()
 
-  const { data: messages } = await supabase
-    .from('messages')
-    .select('*')
-    .eq('thread_id', id)
-    .order('created_at', { ascending: true })
+  const threadMessages = await db.select().from(messages)
+    .where(eq(messages.thread_id, id))
+    .orderBy(messages.created_at)
 
-  const brief = thread.briefs as { topic: string; brand: string } | null
+  let brief: { topic: string; brand: string } | null = null
+  if (thread.brief_id) {
+    const [row] = await db.select({ topic: briefs.topic, brand: briefs.brand })
+      .from(briefs).where(eq(briefs.id, thread.brief_id))
+    brief = row ?? null
+  }
 
   return (
     <div className="flex flex-col h-[calc(100vh-6rem)]">
@@ -40,7 +40,7 @@ export default async function ThreadPage({ params }: { params: Promise<{ id: str
       <div className="glass flex-1 p-5 overflow-hidden flex flex-col">
         <MessageThread
           threadId={id}
-          initialMessages={messages ?? []}
+          initialMessages={threadMessages}
         />
       </div>
     </div>

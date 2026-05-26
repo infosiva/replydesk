@@ -1,12 +1,12 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createClient } from '@supabase/supabase-js'
 import { notFound } from 'next/navigation'
 import DownloadCenter from '@/components/DownloadCenter'
 import JobProgress from '@/components/JobProgress'
+import { ApprovalWidget } from '@/components/ApprovalWidget'
 import Link from 'next/link'
-import type { DbAsset, Tier } from '@/lib/types'
+import type { DbAsset, DbComment, Tier } from '@/lib/types'
 import { use } from 'react'
 
 interface Brief {
@@ -27,45 +27,33 @@ function ResultsContent({ id }: { id: string }) {
   const [loading, setLoading] = useState(true)
   const [notFoundError, setNotFoundError] = useState(false)
 
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  )
-
   useEffect(() => {
     async function load() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
+      const res = await fetch(`/api/results/${id}`)
+      if (res.status === 401) {
         window.location.href = '/login'
         return
       }
-
-      const [briefRes, assetsRes, userRes] = await Promise.all([
-        supabase.from('briefs').select('*').eq('id', id).eq('user_id', user.id).single(),
-        supabase.from('assets').select('*').eq('brief_id', id),
-        supabase.from('users').select('tier').eq('id', user.id).single(),
-      ])
-
-      if (!briefRes.data) {
+      if (res.status === 404) {
         setNotFoundError(true)
         return
       }
+      if (!res.ok) return
 
-      setBrief(briefRes.data as Brief)
-      setAssets((assetsRes.data ?? []) as DbAsset[])
-      setTier(((userRes.data?.tier ?? 'free') as Tier))
+      const data = await res.json() as { brief: Brief; assets: DbAsset[]; tier: Tier }
+      setBrief(data.brief)
+      setAssets(data.assets)
+      setTier(data.tier)
       setLoading(false)
     }
     load()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
 
   function handleComplete() {
-    // Reload assets once complete
-    supabase.from('assets').select('*').eq('brief_id', id).then(({ data }) => {
-      if (data) setAssets(data as DbAsset[])
+    fetch(`/api/results/${id}`).then(r => r.json()).then((data: { brief: Brief; assets: DbAsset[]; tier: Tier }) => {
+      setAssets(data.assets)
+      setBrief(prev => prev ? { ...prev, status: 'complete' } : prev)
     })
-    setBrief((prev) => prev ? { ...prev, status: 'complete' } : prev)
   }
 
   if (loading) {
@@ -131,7 +119,26 @@ function ResultsContent({ id }: { id: string }) {
           </Link>
         </div>
       ) : (
-        <DownloadCenter assets={assets} tier={tier} />
+        <>
+          <DownloadCenter assets={assets} tier={tier} />
+          <div className="mt-6 space-y-4">
+            {assets.map(asset => (
+              <div key={asset.id} className="glass p-4">
+                <ApprovalWidget
+                  assetId={asset.id}
+                  approvedAt={asset.approved_at ? asset.approved_at.toISOString() : null}
+                  comments={((asset as DbAsset & { comments?: DbComment[] }).comments ?? []).map(c => ({
+                    id: c.id,
+                    author_email: c.author_email,
+                    body: c.body,
+                    resolved: c.resolved,
+                    created_at: c.created_at,
+                  }))}
+                />
+              </div>
+            ))}
+          </div>
+        </>
       )}
 
       {tier === 'free' && brief.status === 'complete' && (

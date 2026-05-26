@@ -1,25 +1,29 @@
-import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { auth } from '@/lib/auth'
+import { db } from '@/lib/db'
+import { briefs, users } from '@/lib/schema'
+import { eq, desc } from 'drizzle-orm'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import type { DbBrief } from '@/lib/types'
 
 export default async function DashboardPage() {
-  const supabase = await createServerSupabaseClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+  const session = await auth()
+  if (!session?.user?.id) redirect('/login')
 
-  const { data: briefs } = await supabase
-    .from('briefs')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false })
+  const userId = session.user.id
+
+  const [userData] = await db
+    .select({ tier: users.tier, briefs_used_this_month: users.briefs_used_this_month })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1)
+
+  const briefRows = await db
+    .select()
+    .from(briefs)
+    .where(eq(briefs.user_id, userId))
+    .orderBy(desc(briefs.created_at))
     .limit(20)
-
-  const { data: userData } = await supabase
-    .from('users')
-    .select('tier, briefs_used_this_month')
-    .eq('id', user.id)
-    .single()
 
   const tier = userData?.tier ?? 'free'
   const used = userData?.briefs_used_this_month ?? 0
@@ -43,7 +47,7 @@ export default async function DashboardPage() {
         </Link>
       </div>
 
-      {!briefs || briefs.length === 0 ? (
+      {briefRows.length === 0 ? (
         <div className="glass p-12 text-center">
           <div className="text-4xl mb-4">✨</div>
           <h2 className="text-lg font-semibold text-white mb-2">No briefs yet</h2>
@@ -54,7 +58,7 @@ export default async function DashboardPage() {
         </div>
       ) : (
         <div className="space-y-3">
-          {(briefs as DbBrief[]).map(brief => (
+          {(briefRows as DbBrief[]).map(brief => (
             <Link
               key={brief.id}
               href={`/dashboard/results/${brief.id}`}

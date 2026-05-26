@@ -1,35 +1,7 @@
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
-import { createClient as createSBClient } from '@supabase/supabase-js'
-
-export async function createServerSupabaseClient() {
-  const cookieStore = await cookies()
-
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll()
-        },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            )
-          } catch {
-            // Called from Server Component — cookies set by proxy
-          }
-        },
-      },
-    }
-  )
-}
-
-export function createServiceRoleClient() {
-  return createSBClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
-}
+/**
+ * Compatibility shim — replaced Supabase with Neon+Drizzle.
+ * Import `auth` from '@/lib/auth' and `db` from '@/lib/db' in new code.
+ * This file kept for gradual migration of existing imports.
+ */
+export { auth as getServerAuth } from './auth'
+export { db } from './db'

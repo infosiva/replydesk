@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyQStashSignature } from '@/lib/queue'
-import { createServiceRoleClient } from '@/lib/supabase-server'
+import { db } from '@/lib/db'
+import { assets, briefs, users } from '@/lib/schema'
+import { eq } from 'drizzle-orm'
 import {
   generateBlogPost,
   generateLinkedInPosts,
@@ -16,7 +18,6 @@ import type { JobPayload } from '@/lib/queue'
 import type { ContentBrief } from '@/lib/types'
 
 export async function POST(request: NextRequest) {
-  // Clone request for signature verification (body can only be read once)
   const clonedReq = request.clone()
 
   try {
@@ -35,10 +36,7 @@ export async function POST(request: NextRequest) {
   const { briefId, userId, tier } = payload
   const brief = payload.brief as ContentBrief
 
-  const supabase = createServiceRoleClient()
-
   try {
-    // Run all text generation in parallel based on tier
     const freeJobs = [
       generateBlogPost(brief),
       generateLinkedInPosts(brief),
@@ -77,32 +75,22 @@ export async function POST(request: NextRequest) {
       .map(([type, content]) => ({ brief_id: briefId, type, content }))
 
     if (assetInserts.length > 0) {
-      await supabase.from('assets').insert(assetInserts)
+      await db.insert(assets).values(assetInserts)
     }
 
-    // Increment jobs_done and check if all done
-    const { data: briefRow } = await supabase
-      .from('briefs')
-      .select('jobs_done, jobs_total, user_id')
-      .eq('id', briefId)
-      .single()
+    const [briefRow] = await db.select({ jobs_done: briefs.jobs_done, jobs_total: briefs.jobs_total, user_id: briefs.user_id })
+      .from(briefs).where(eq(briefs.id, briefId))
 
     const newDone = (briefRow?.jobs_done ?? 0) + 1
     const allDone = newDone >= (briefRow?.jobs_total ?? 1)
 
-    await supabase
-      .from('briefs')
-      .update({ jobs_done: newDone, ...(allDone ? { status: 'complete' } : {}) })
-      .eq('id', briefId)
+    await db.update(briefs).set({
+      jobs_done: newDone,
+      ...(allDone ? { status: 'complete' } : {}),
+    }).where(eq(briefs.id, briefId))
 
-    // Send delivery email if all text assets are done (first job to finish)
     if (assetInserts.length > 0) {
-      const { data: userRow } = await supabase
-        .from('users')
-        .select('email')
-        .eq('id', userId)
-        .single()
-
+      const [userRow] = await db.select({ email: users.email }).from(users).where(eq(users.id, userId))
       if (userRow?.email) {
         await sendDeliveryEmail(userRow.email, briefId, assetInserts.map((a) => a.type))
       }
@@ -111,7 +99,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: true, assets: assetInserts.length })
   } catch (err) {
     console.error('Text job error:', err)
-    await supabase.from('briefs').update({ status: 'error' }).eq('id', briefId)
+    await db.update(briefs).set({ status: 'error' }).where(eq(briefs.id, briefId))
     return NextResponse.json({ error: 'Text job failed' }, { status: 500 })
   }
 }

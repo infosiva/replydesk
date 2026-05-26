@@ -1,6 +1,8 @@
 import Groq from 'groq-sdk'
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
+function getGroq() {
+  return new Groq({ apiKey: process.env.GROQ_API_KEY })
+}
 
 export async function generateText(prompt: string, systemPrompt?: string): Promise<string> {
   const providers = [
@@ -25,7 +27,7 @@ async function callGroq(prompt: string, systemPrompt?: string): Promise<string> 
   if (systemPrompt) messages.push({ role: 'system', content: systemPrompt })
   messages.push({ role: 'user', content: prompt })
 
-  const res = await groq.chat.completions.create({
+  const res = await getGroq().chat.completions.create({
     model: 'llama-3.3-70b-versatile',
     messages,
     temperature: 0.7,

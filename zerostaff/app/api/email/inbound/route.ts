@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServiceRoleClient } from '@/lib/supabase-server'
+import { db } from '@/lib/db'
+import { threads, messages } from '@/lib/schema'
+import { eq } from 'drizzle-orm'
 
 // Resend inbound email webhook
 // Configure at resend.com/inbound — set webhook URL to /api/email/inbound
@@ -13,34 +15,21 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
-  // Extract thread ID from the To address (thread-{id}@domain)
   const to = (body.to as string) ?? ''
   const match = to.match(/thread-([0-9a-f-]+)@/)
-  if (!match) {
-    // Not a thread reply — ignore
-    return NextResponse.json({ ok: true })
-  }
+  if (!match) return NextResponse.json({ ok: true })
 
   const threadId = match[1]
   const from = (body.from as string) ?? 'unknown'
   const text = ((body.text ?? body.html ?? '') as string).slice(0, 10_000)
 
-  const supabase = createServiceRoleClient()
+  const [thread] = await db.select({ id: threads.id }).from(threads).where(eq(threads.id, threadId))
+  if (!thread) return NextResponse.json({ ok: true })
 
-  // Verify thread exists
-  const { data: thread } = await supabase
-    .from('threads')
-    .select('id')
-    .eq('id', threadId)
-    .single()
-
-  if (!thread) {
-    return NextResponse.json({ ok: true }) // silently ignore unknown threads
-  }
-
-  await supabase.from('messages').insert({
+  await db.insert(messages).values({
     thread_id: threadId,
-    sender: from,
+    sender_email: from,
+    direction: 'inbound',
     body: text.trim(),
   })
 

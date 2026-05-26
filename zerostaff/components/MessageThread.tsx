@@ -1,13 +1,13 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { createClient } from '@supabase/supabase-js'
 
 interface Message {
   id: string
-  sender: string
+  sender_email: string
+  direction: string
   body: string
-  created_at: string
+  created_at: Date | string
 }
 
 interface MessageThreadProps {
@@ -22,41 +22,37 @@ export default function MessageThread({ threadId, initialMessages }: MessageThre
   const bottomRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    )
-
-    const channel = supabase
-      .channel(`thread:${threadId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-          filter: `thread_id=eq.${threadId}`,
-        },
-        (payload) => {
-          setMessages((prev) => [...prev, payload.new as Message])
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/threads/${threadId}/messages`)
+        if (res.ok) {
+          const data = await res.json()
+          setMessages(data.messages ?? [])
           setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50)
-        },
-      )
-      .subscribe()
+        }
+      } catch {
+        // ignore
+      }
+    }, 4000)
 
-    return () => { supabase.removeChannel(channel) }
+    return () => clearInterval(interval)
   }, [threadId])
 
   async function handleSend() {
     if (!reply.trim()) return
     setSending(true)
     try {
-      await fetch(`/api/threads/${threadId}/messages`, {
+      const res = await fetch(`/api/threads/${threadId}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ body: reply.trim() }),
       })
-      setReply('')
+      if (res.ok) {
+        const data = await res.json()
+        setMessages((prev) => [...prev, data.message])
+        setReply('')
+        setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50)
+      }
     } finally {
       setSending(false)
     }
@@ -72,16 +68,16 @@ export default function MessageThread({ threadId, initialMessages }: MessageThre
         {messages.map((msg) => (
           <div
             key={msg.id}
-            className={`flex ${msg.sender === 'agent' ? 'justify-start' : 'justify-end'}`}
+            className={`flex ${msg.direction === 'inbound' ? 'justify-start' : 'justify-end'}`}
           >
             <div className={`max-w-[80%] rounded-xl px-4 py-2.5 ${
-              msg.sender === 'agent'
+              msg.direction === 'inbound'
                 ? 'bg-white/[0.06] text-white/80'
                 : 'bg-purple-600/80 text-white'
             }`}>
               <p className="text-sm whitespace-pre-wrap">{msg.body}</p>
               <p className="text-[10px] mt-1 opacity-40">
-                {msg.sender === 'agent' ? 'ZeroStaff' : msg.sender} ·{' '}
+                {msg.direction === 'inbound' ? msg.sender_email : 'You'} ·{' '}
                 {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </p>
             </div>

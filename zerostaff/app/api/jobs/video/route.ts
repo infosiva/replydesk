@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyQStashSignature } from '@/lib/queue'
-import { createServiceRoleClient } from '@/lib/supabase-server'
+import { db } from '@/lib/db'
+import { assets, briefs } from '@/lib/schema'
+import { eq } from 'drizzle-orm'
 import { generateVideoStoryboard } from '@/lib/generate'
 import { storyboardToVideo } from '@/lib/falai'
 import { uploadToR2 } from '@/lib/r2'
@@ -26,8 +28,6 @@ export async function POST(request: NextRequest) {
   const { briefId } = payload
   const brief = payload.brief as ContentBrief
 
-  const supabase = createServiceRoleClient()
-
   try {
     // Generate storyboard via Groq
     const storyboard = await generateVideoStoryboard(brief)
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     const fileUrl = await uploadToR2(videoBuffer, key, 'video/mp4')
 
     // Save asset with file metadata
-    await supabase.from('assets').insert({
+    await db.insert(assets).values({
       brief_id: briefId,
       type: 'video_asset',
       content: {
@@ -53,19 +53,15 @@ export async function POST(request: NextRequest) {
     })
 
     // Increment jobs_done
-    const { data: briefRow } = await supabase
-      .from('briefs')
-      .select('jobs_done, jobs_total')
-      .eq('id', briefId)
-      .single()
+    const [briefRow] = await db.select({ jobs_done: briefs.jobs_done, jobs_total: briefs.jobs_total })
+      .from(briefs).where(eq(briefs.id, briefId))
 
     const newDone = (briefRow?.jobs_done ?? 0) + 1
     const allDone = newDone >= (briefRow?.jobs_total ?? 1)
 
-    await supabase
-      .from('briefs')
-      .update({ jobs_done: newDone, ...(allDone ? { status: 'complete' } : {}) })
-      .eq('id', briefId)
+    await db.update(briefs)
+      .set({ jobs_done: newDone, ...(allDone ? { status: 'complete' } : {}) })
+      .where(eq(briefs.id, briefId))
 
     return NextResponse.json({ ok: true, fileUrl })
   } catch (err) {

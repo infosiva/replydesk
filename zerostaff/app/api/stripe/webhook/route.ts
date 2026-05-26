@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getStripeInstance } from '@/lib/stripe'
-import { createServiceRoleClient } from '@/lib/supabase-server'
+import { db } from '@/lib/db'
+import { users } from '@/lib/schema'
+import { eq } from 'drizzle-orm'
 import type Stripe from 'stripe'
 
 export async function POST(request: NextRequest) {
@@ -15,44 +17,33 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
   }
 
-  const supabase = createServiceRoleClient()
-
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session
     const userId = session.metadata?.userId
     if (!userId) return NextResponse.json({ ok: true })
 
-    await supabase
-      .from('users')
-      .update({
-        tier: 'pro',
-        stripe_customer_id: session.customer as string,
-        stripe_subscription_id: session.subscription as string,
-      })
-      .eq('id', userId)
+    await db.update(users).set({
+      tier: 'pro',
+      stripe_customer_id: session.customer as string,
+      stripe_subscription_id: session.subscription as string,
+    }).where(eq(users.id, userId))
   }
 
   if (event.type === 'customer.subscription.deleted') {
     const subscription = event.data.object as Stripe.Subscription
-    await supabase
-      .from('users')
-      .update({ tier: 'free' })
-      .eq('stripe_subscription_id', subscription.id)
+    await db.update(users).set({ tier: 'free' })
+      .where(eq(users.stripe_subscription_id, subscription.id))
   }
 
   if (event.type === 'customer.subscription.updated') {
     const subscription = event.data.object as Stripe.Subscription
     const status = subscription.status
     if (status === 'active') {
-      await supabase
-        .from('users')
-        .update({ tier: 'pro' })
-        .eq('stripe_subscription_id', subscription.id)
+      await db.update(users).set({ tier: 'pro' })
+        .where(eq(users.stripe_subscription_id, subscription.id))
     } else if (status === 'canceled' || status === 'unpaid') {
-      await supabase
-        .from('users')
-        .update({ tier: 'free' })
-        .eq('stripe_subscription_id', subscription.id)
+      await db.update(users).set({ tier: 'free' })
+        .where(eq(users.stripe_subscription_id, subscription.id))
     }
   }
 

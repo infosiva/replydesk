@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { auth } from '@/lib/auth'
+import { db } from '@/lib/db'
+import { users, workspaces, briefs } from '@/lib/schema'
+import { eq } from 'drizzle-orm'
 import { enqueueJob } from '@/lib/queue'
 import { z } from 'zod'
 
@@ -15,9 +18,9 @@ const BriefSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createServerSupabaseClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const session = await auth()
+    if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const userId = session.user.id
 
     const body = await request.json()
     const parsed = BriefSchema.safeParse(body)
@@ -25,12 +28,11 @@ export async function POST(request: NextRequest) {
 
     const { brief } = parsed.data
 
-    // Check tier + usage limit
-    const { data: userData } = await supabase
-      .from('users')
-      .select('tier, briefs_used_this_month, briefs_reset_at')
-      .eq('id', user.id)
-      .single()
+    const [userData] = await db.select({
+      tier: users.tier,
+      briefs_used_this_month: users.briefs_used_this_month,
+      briefs_reset_at: users.briefs_reset_at,
+    }).from(users).where(eq(users.id, userId))
 
     const tier = (userData?.tier ?? 'free') as 'free' | 'pro' | 'agency'
     const used = userData?.briefs_used_this_month ?? 0
@@ -42,59 +44,44 @@ export async function POST(request: NextRequest) {
     let currentUsed = used
     if (resetAt < monthAgo) {
       currentUsed = 0
-      await supabase.from('users').update({ briefs_used_this_month: 0, briefs_reset_at: new Date().toISOString() }).eq('id', user.id)
+      await db.update(users).set({ briefs_used_this_month: 0, briefs_reset_at: new Date() }).where(eq(users.id, userId))
     }
 
     if (currentUsed >= limit) {
       return NextResponse.json({ error: 'Monthly brief limit reached. Upgrade to Pro.' }, { status: 403 })
     }
 
-    // Get or create workspace
-    const { data: workspace } = await supabase
-      .from('workspaces')
-      .select('id')
-      .eq('owner_id', user.id)
-      .single()
+    const [workspace] = await db.select({ id: workspaces.id }).from(workspaces)
+      .where(eq(workspaces.owner_id, userId))
 
     if (!workspace) {
       return NextResponse.json({ error: 'No workspace found' }, { status: 400 })
     }
 
-    // Determine how many async jobs to enqueue
     const jobTypes: Array<'text' | 'audio' | 'video'> = ['text']
     if (tier === 'pro' || tier === 'agency') jobTypes.push('audio')
     if (tier === 'agency') jobTypes.push('video')
 
-    // Create brief record with job count
-    const { data: briefRecord, error: briefError } = await supabase
-      .from('briefs')
-      .insert({
-        workspace_id: workspace.id,
-        user_id: user.id,
-        topic: brief.topic,
-        brand: brief.brand,
-        audience: brief.audience,
-        tone: brief.tone,
-        keywords: brief.keywords,
-        status: 'processing',
-        jobs_total: jobTypes.length,
-        jobs_done: 0,
-      })
-      .select('id')
-      .single()
+    const [briefRecord] = await db.insert(briefs).values({
+      workspace_id: workspace.id,
+      user_id: userId,
+      topic: brief.topic,
+      brand: brief.brand,
+      audience: brief.audience,
+      tone: brief.tone,
+      keywords: brief.keywords,
+      status: 'processing',
+      jobs_total: jobTypes.length,
+      jobs_done: 0,
+    }).returning({ id: briefs.id })
 
-    if (briefError || !briefRecord) {
+    if (!briefRecord) {
       return NextResponse.json({ error: 'Failed to create brief' }, { status: 500 })
     }
 
-    // Increment usage
-    await supabase
-      .from('users')
-      .update({ briefs_used_this_month: currentUsed + 1 })
-      .eq('id', user.id)
+    await db.update(users).set({ briefs_used_this_month: currentUsed + 1 }).where(eq(users.id, userId))
 
-    // Enqueue async jobs
-    const jobPayload = { briefId: briefRecord.id, userId: user.id, tier, brief }
+    const jobPayload = { briefId: briefRecord.id, userId, tier, brief }
     await Promise.all(jobTypes.map((type) => enqueueJob(type, jobPayload)))
 
     return NextResponse.json({ briefId: briefRecord.id, queued: true, jobs: jobTypes })

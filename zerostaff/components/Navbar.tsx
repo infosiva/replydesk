@@ -1,8 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase'
+import { signOut } from 'next-auth/react'
 import type { Tier } from '@/lib/types'
 
 const tierColors: Record<Tier, string> = {
@@ -17,15 +16,6 @@ interface NavbarProps {
 }
 
 export default function Navbar({ email, tier = 'free' }: NavbarProps) {
-  const router = useRouter()
-  const supabase = createClient()
-
-  async function signOut() {
-    await supabase.auth.signOut()
-    router.push('/')
-    router.refresh()
-  }
-
   return (
     <nav className="sticky top-0 z-50 border-b border-white/[0.06]" style={{ background: 'rgba(5,4,15,0.80)', backdropFilter: 'blur(20px)' }}>
       <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
@@ -43,7 +33,7 @@ export default function Navbar({ email, tier = 'free' }: NavbarProps) {
             <span className="text-sm text-white/50 hidden sm:block">{email}</span>
           )}
           <button
-            onClick={signOut}
+            onClick={() => signOut({ callbackUrl: '/' })}
             className="text-sm text-white/50 hover:text-white/80 transition"
           >
             Sign out

@@ -1,7 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { createClient } from '@supabase/supabase-js'
+import { useEffect, useRef, useState } from 'react'
 
 interface JobProgressProps {
   briefId: string
@@ -30,6 +29,8 @@ const ASSET_LABELS: Record<string, string> = {
   video_asset: 'Video MP4',
 }
 
+const POLL_INTERVAL = 3000
+
 export default function JobProgress({
   briefId,
   initialDone,
@@ -41,57 +42,37 @@ export default function JobProgress({
   const [total] = useState(initialTotal)
   const [status, setStatus] = useState(initialStatus)
   const [readyAssets, setReadyAssets] = useState<string[]>([])
+  const prevDoneRef = useRef(initialDone)
+  const completedRef = useRef(false)
 
   useEffect(() => {
     if (status !== 'processing') return
 
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    )
+    const poll = async () => {
+      try {
+        const res = await fetch(`/api/briefs/${briefId}/status`)
+        if (!res.ok) return
+        const data = await res.json() as { jobs_done: number; status: string; asset_types: string[] }
+        setDone(data.jobs_done)
+        setStatus(data.status)
 
-    // Subscribe to brief status changes
-    const briefSub = supabase
-      .channel(`brief:${briefId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'briefs',
-          filter: `id=eq.${briefId}`,
-        },
-        (payload) => {
-          const row = payload.new as { jobs_done: number; status: string }
-          setDone(row.jobs_done)
-          setStatus(row.status)
-          if (row.status === 'complete') onComplete()
-        },
-      )
-      .subscribe()
+        if (data.asset_types?.length > prevDoneRef.current) {
+          setReadyAssets(data.asset_types)
+          prevDoneRef.current = data.asset_types.length
+        }
 
-    // Subscribe to new assets
-    const assetSub = supabase
-      .channel(`assets:${briefId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'assets',
-          filter: `brief_id=eq.${briefId}`,
-        },
-        (payload) => {
-          const row = payload.new as { type: string }
-          setReadyAssets((prev) => [...prev, row.type])
-        },
-      )
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(briefSub)
-      supabase.removeChannel(assetSub)
+        if (data.status === 'complete' && !completedRef.current) {
+          completedRef.current = true
+          onComplete()
+        }
+      } catch {
+        // ignore transient errors
+      }
     }
+
+    const id = setInterval(poll, POLL_INTERVAL)
+    poll() // immediate first poll
+    return () => clearInterval(id)
   }, [briefId, status, onComplete])
 
   const pct = total > 0 ? Math.round((done / total) * 100) : 0
@@ -103,7 +84,6 @@ export default function JobProgress({
         <p className="text-white/70 font-medium">Generating your content</p>
       </div>
 
-      {/* Progress bar */}
       <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden mb-6">
         <div
           className="h-full bg-gradient-to-r from-purple-600 to-violet-500 rounded-full transition-all duration-700"
@@ -115,7 +95,6 @@ export default function JobProgress({
         {done} of {total} job{total !== 1 ? 's' : ''} complete
       </p>
 
-      {/* Live asset tiles */}
       {readyAssets.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           {readyAssets.map((type) => (
@@ -130,7 +109,6 @@ export default function JobProgress({
         </div>
       )}
 
-      {/* Pending placeholders */}
       {readyAssets.length === 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           {Object.entries(JOB_LABELS).map(([, label]) => (

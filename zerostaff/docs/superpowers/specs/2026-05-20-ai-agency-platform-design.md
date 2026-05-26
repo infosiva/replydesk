@@ -365,5 +365,196 @@ Agency tier: full invoicing system for billing their own clients (separate from 
 - Voice cloning (ElevenLabs standard voices only)
 - Video editing UI (fal.ai output is final)
 - Multi-language content generation
-- Built-in CRM contact database
 - Native mobile app
+
+---
+
+## 20. Lead Research Scraper
+
+Autonomous lead discovery pipeline — finds prospects matching the client's ICP, enriches them, and pre-fills outreach templates.
+
+### Flow
+1. Agency defines ICP per workspace: industry, title, company size, geography, keywords
+2. Scraper runs on demand or scheduled (weekly):
+   - **Apollo.io API** (primary) — search by title + industry + company size → returns name, email, LinkedIn URL, company, role
+   - **Hunter.io** (fallback) — domain-based email finder
+   - **Phantombuster** (optional, agency tier) — LinkedIn profile scraper for deeper enrichment
+3. Results stored in `leads` table per workspace
+4. AI enrichment pass (Groq): write personalised first-line for each lead based on their role + company
+5. Auto-fill outreach templates: DM copy, cold email, LinkedIn connection message — pre-populated per lead
+6. Export: CSV download or push to client's outreach tool (Instantly.ai webhook, optional)
+
+### Data model additions
+- `leads` — id, workspace_id, name, email, linkedin_url, company, title, industry, enriched_first_line, created_at, source
+- `lead_lists` — id, workspace_id, name, icp_config (jsonb), created_at, lead_count
+
+### Tier gating
+- Free: 0 (manual only, no scraper)
+- Pro: 50 leads/mo
+- Agency: 500 leads/mo + scheduled scraping + CSV export + webhook push
+
+### API routes
+- `POST /api/leads/scrape` — triggers scrape for workspace ICP
+- `GET /api/leads` — list leads with pagination
+- `POST /api/leads/enrich` — AI first-line enrichment pass
+- `GET /api/leads/export` — CSV download
+
+---
+
+## 21. Quote & Proposal Builder
+
+Pre-sale document workflow: agency builds a branded proposal, client approves online, deal converts to retainer.
+
+### Flow
+1. Agency creates proposal: client name, services offered, pricing table, timeline, terms
+2. System generates PDF (React PDF) — agency logo, brand colors, structured sections
+3. Agency sends proposal link (Resend) — unique shareable URL, no login required for client
+4. Client views proposal in browser (read-only branded view), clicks "Accept Proposal"
+5. Acceptance logged with timestamp + IP
+6. On acceptance: system optionally auto-creates retainer invoice (Stripe recurring) and provisions client workspace
+7. Agency notified via email + dashboard alert
+
+### Proposal sections
+- Cover: agency name, client name, date, proposal title
+- Executive summary (Groq-generated from brief if desired, editable)
+- Services scope: line items with description + price
+- Timeline: milestone table
+- Pricing summary: subtotal, discount, total, billing cadence
+- Terms & conditions (free-text, templated)
+- Acceptance block: "I accept this proposal" button + name field
+
+### Data model additions
+- `proposals` — id, workspace_id, client_email, title, status (draft/sent/accepted/declined), accepted_at, created_at
+- `proposal_items` — id, proposal_id, description, quantity, unit_price, total
+- `proposal_terms` — proposal_id, body (free text)
+
+### Tier gating
+- Pro: 5 proposals/mo
+- Agency: unlimited proposals + custom terms template + Stripe auto-conversion on acceptance
+
+### API routes
+- `POST /api/proposals` — create proposal
+- `GET /api/proposals/:id/view` — public proposal view (no auth)
+- `POST /api/proposals/:id/accept` — record acceptance
+- `GET /api/proposals/:id/pdf` — download PDF
+
+---
+
+## 22. Voice Agent (Inbound + Outbound)
+
+AI-powered voice agent for client intake (inbound) and lead outreach (outbound).
+
+**Provider:** Vapi.ai (primary) — programmable voice AI, tool calls, custom LLM, call recording.
+
+### 22a — Inbound Intake Agent
+
+Handles inbound calls from prospective clients visiting the agency's site or calling a listed number.
+
+**Number provisioning:** Vapi buys/assigns a US phone number per agency workspace (Agency tier). Published on agency's site + landing page.
+
+**Call flow:**
+```
+Caller dials → Vapi routes to ZeroStaff inbound agent
+  → Agent greets (ElevenLabs voice, agency-branded)
+  → Collects: company name, industry, content needs, budget range, timeline
+  → Checks calendar availability (Google Calendar MCP) → offers booking slot
+  → Sends SMS summary + confirmation to caller
+  → Stores transcript + lead record in ZeroStaff (`leads` table)
+  → Notifies agency via email (Resend) + dashboard alert
+  → If budget qualifies: auto-draft proposal (§21 builder)
+```
+
+**System prompt per workspace:** Agency fills in their offer, pricing range, FAQs in workspace settings → Vapi agent uses it as context.
+
+### 22b — Outbound Sales Agent
+
+Calls leads from the lead scraper (§20) on agency's behalf.
+
+**Call flow:**
+```
+Agency selects leads from lead list → clicks "Run outbound campaign"
+  → Vapi queues calls (rate-limited: 10/hr default, 50/hr Agency)
+  → Agent calls each lead, identifies self as [agency name] team
+  → Delivers 30-second pitch (Groq-generated from ICP + offer)
+  → If interested → books meeting (Google Calendar link) or patches to live agency line
+  → If not interested → logs outcome, respects do-not-call
+  → All outcomes stored in `call_logs` table
+  → Summary report auto-generated after campaign
+```
+
+### Data model additions
+- `vapi_agents` — id, workspace_id, vapi_agent_id, type (inbound|outbound), phone_number, system_prompt
+- `call_logs` — id, workspace_id, lead_id (nullable), vapi_call_id, type, outcome, duration_secs, transcript, recording_url, created_at
+- `outbound_campaigns` — id, workspace_id, lead_list_id, status, calls_made, calls_answered, meetings_booked, created_at
+
+### Tier gating
+- Free/Pro: 0 (no voice agent)
+- Agency: inbound agent (1 number) + outbound campaigns (500 calls/mo included)
+- Add-on: extra numbers $10/mo each, extra outbound calls $0.05/min
+
+### API routes
+- `POST /api/voice/agents` — create/update Vapi agent for workspace
+- `POST /api/voice/outbound/campaign` — launch outbound campaign
+- `GET /api/voice/logs` — call log with transcript viewer
+- `POST /api/voice/webhook` — Vapi webhook receiver (call events, transcripts)
+
+### Key integrations
+- **Vapi.ai** — VAPI_API_KEY, VAPI_PHONE_NUMBER_POOL
+- **ElevenLabs** — voice ID per workspace (agency picks from preset voices)
+- **Google Calendar MCP** — booking availability + event creation
+- **Twilio** (optional fallback) — if Vapi not available in a region
+
+---
+
+## 23. Updated Tech Stack
+
+| Added | Technology | Purpose |
+|-------|-----------|---------|
+| Lead scraping | Apollo.io API + Hunter.io | ICP-matched lead discovery |
+| Lead enrichment | Groq | AI first-line personalisation |
+| Voice agents | Vapi.ai | Inbound intake + outbound calling |
+| Proposal PDF | @react-pdf/renderer | Branded proposal generation |
+| Proposal delivery | Resend (already in stack) | Proposal share link email |
+
+---
+
+## 24. Updated Phased Build Order
+
+### Phase 1 — Core Engine (DONE)
+- Brief form → Groq text gen → results + download center + Stripe
+
+### Phase 2 — Real Media + Email
+- ElevenLabs podcast MP3
+- fal.ai Kling video
+- R2 file storage + Upstash QStash + Supabase Realtime
+- Resend outbound + inbound email
+- In-portal messaging threads
+
+### Phase 3 — Client Approval + Calendar + Proposal
+- Approval workflow
+- Content calendar
+- **Quote & Proposal Builder** (§21) ← new
+- Google Calendar MCP sync
+
+### Phase 4 — Lead Research + Voice
+- **Lead Research Scraper** (§20) ← new
+- **Voice Agent — Inbound + Outbound** (§22) ← new
+- Vapi.ai integration + call logs + campaign runner
+
+### Phase 5 — Full Agency OS
+- Sub-accounts + white-label portal
+- Custom domain, run-on-behalf, team roles
+- Retainer invoicing (Stripe Billing)
+- Revenue analytics dashboard
+- API access + webhooks
+
+---
+
+## 25. Out of Scope (v1)
+
+- Direct social scheduling/publishing
+- Voice cloning (ElevenLabs standard voices only)
+- Video editing UI
+- Multi-language content generation
+- Native mobile app
+- Built-in CRM beyond lead list (use Instantly.ai / HubSpot via webhook)
