@@ -46,6 +46,7 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className} bg-gray-950 text-gray-100 min-h-full`}>
         {children}
+        <Script defer data-site="switchboard-ai.vercel.app" src="http://31.97.56.148:3098/t.js" strategy="afterInteractive" />
       </body>
     </html>
   );
