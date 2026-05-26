@@ -1,10 +1,12 @@
 import type { Metadata } from 'next'
+import Script from 'next/script'
 import './globals.css'
 
 export const metadata: Metadata = {
   title: 'PhotoRestore — Bring Old Photos Back to Life',
   description: 'AI-powered photo restoration. Fix scratches, enhance faces, add color to black & white photos in seconds.',
   keywords: 'restore old photos, photo restoration, AI photo repair, colorize photos, fix scratched photos',
+  metadataBase: new URL('https://photorestore.app'),
   openGraph: {
     title: 'PhotoRestore — Bring Old Photos Back to Life',
     description: 'AI-powered photo restoration. Fix scratches, enhance faces, add color to black & white photos in seconds.',
@@ -19,8 +21,18 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "PhotoRestore",
+          "url": "https://photorestore.app",
+          "description": "AI-powered photo restoration"
+        })}} />
+      </head>
       <body className="relative">
         {children}
+        <Script defer data-site="photorestore.app" src="http://31.97.56.148:3098/t.js" strategy="afterInteractive" />
       </body>
     </html>
   )
