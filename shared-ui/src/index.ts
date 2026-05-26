@@ -42,6 +42,10 @@ export type { ChatMessage as SmartChatMessage, SmartChatProps, FloatingChatProps
 export { AnimatedHero, SocialProofBar } from './ui/AnimatedHero'
 export type { AnimatedHeroProps } from './ui/AnimatedHero'
 
+// Feature carousel (snap-scroll, auto-play, drag)
+export { FeatureCarousel } from './ui/FeatureCarousel'
+export type { FeatureCarouselProps, CarouselSlide } from './ui/FeatureCarousel'
+
 // AI media generation hooks (call from API routes — server-side)
 // import { generateImage } from '@siva/shared-ui/lib/image-gen'
 // import { generateVideo } from '@siva/shared-ui/lib/video-gen'
