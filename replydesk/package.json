@@ -14,6 +14,7 @@
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "@sendgrid/mail": "^8.1.6",
+    "framer-motion": "^12.40.0",
     "groq-sdk": "^1.2.0",
     "next": "16.2.6",
     "pg": "^8.20.0",
