@@ -71,7 +71,7 @@ export async function getSiteFlags(siteId: string): Promise<SiteFlags> {
         const key = item.key as string
         const m = key.match(/^toggle_[a-z0-9-]+_([a-z]+)$/)
         if (m && FLAG_KEYS.includes(m[1] as keyof SiteFlags)) {
-          ;(flags as Record<string, boolean>)[m[1]] = Boolean(item.value)
+          ;(flags as unknown as Record<string, boolean>)[m[1]] = Boolean(item.value)
         }
       }
     } else if (typeof data === "object") {
@@ -79,7 +79,7 @@ export async function getSiteFlags(siteId: string): Promise<SiteFlags> {
       for (const k of FLAG_KEYS) {
         const edgeKey = `toggle_${siteId}_${k}`
         if (edgeKey in data) {
-          ;(flags as Record<string, boolean>)[k] = Boolean(data[edgeKey])
+          ;(flags as unknown as Record<string, boolean>)[k] = Boolean(data[edgeKey])
         }
       }
     }
