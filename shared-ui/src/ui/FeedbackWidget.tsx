@@ -25,8 +25,14 @@ interface Props {
   accentColor2?: string
   /** Override the API endpoint. Defaults to '/api/feedback'. */
   apiEndpoint?: string
-  /** Bottom-right offset in px. Defaults to 24. */
+  /** Bottom offset in px. Defaults to 24. */
   offset?: number
+  /**
+   * Horizontal position of trigger button.
+   * 'right' (default) — use when chatbot is NOT visible.
+   * 'left'            — use when chatbot occupies bottom-right so they don't overlap.
+   */
+  position?: 'left' | 'right'
 }
 
 export default function FeedbackWidget({
@@ -35,6 +41,7 @@ export default function FeedbackWidget({
   accentColor2 = '#ef4444',
   apiEndpoint  = '/api/feedback',
   offset       = 24,
+  position     = 'right',
 }: Props) {
   const [open,    setOpen]    = useState(false)
   const [type,    setType]    = useState('General')
@@ -86,7 +93,9 @@ export default function FeedbackWidget({
         onClick={() => { setOpen(true); reset() }}
         aria-label="Send feedback"
         style={{
-          position: 'fixed', bottom: offset, right: offset, zIndex: 50,
+          position: 'fixed', bottom: offset,
+          ...(position === 'left' ? { left: offset } : { right: offset }),
+          zIndex: 50,
           display: 'flex', alignItems: 'center', gap: 8,
           padding: '10px 18px', borderRadius: 999,
           background: gradient, color: '#000',
@@ -107,7 +116,7 @@ export default function FeedbackWidget({
           onClick={() => setOpen(false)}
           style={{
             position: 'fixed', inset: 0, zIndex: 90,
-            background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)',
+            background: 'rgba(0,0,0,0.55)',
           }}
         />
       )}
@@ -116,7 +125,7 @@ export default function FeedbackWidget({
       {open && (
         <div style={{
           position: 'fixed', zIndex: 100,
-          bottom: 0, right: 0,
+          bottom: 0, ...(position === 'left' ? { left: 0 } : { right: 0 }),
           width: '100%',
           maxWidth: 420,
           borderRadius: '24px 24px 0 0',

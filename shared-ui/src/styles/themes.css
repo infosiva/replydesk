@@ -1,0 +1,236 @@
+/**
+ * Per-project CSS custom property themes.
+ * Import in each project's globals.css:
+ *   @import '@infosiva/shared-ui/styles/themes.css';
+ *
+ * Then set data-theme on <html> to pick the project palette:
+ *   <html data-theme="kwizzo">
+ *
+ * Or override vars directly in globals.css for one-off tweaks.
+ */
+
+/* ── Base dark shell (all projects) ─────────────────────────── */
+:root {
+  --site-bg:           #0a0a0f;
+  --site-surface:      rgba(255,255,255,0.04);
+  --site-border:       rgba(255,255,255,0.08);
+  --site-text:         rgba(255,255,255,0.9);
+  --site-text-2:       rgba(255,255,255,0.5);
+  --site-text-3:       rgba(255,255,255,0.25);
+  --site-radius:       0.75rem;
+  --site-radius-lg:    1.25rem;
+  /* accent set per-theme below */
+  --accent:            #f59e0b;
+  --accent-dim:        rgba(245,158,11,0.12);
+  --accent-glow:       0 0 40px rgba(245,158,11,0.25);
+  --accent-2:          #ef4444;
+}
+
+/* ── Aurora + grain (glass-morphism layer) ───────────────────── */
+.aurora {
+  pointer-events: none;
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.18;
+  mix-blend-mode: screen;
+  will-change: transform;
+  animation: aurora-drift 20s ease-in-out infinite;
+}
+.aurora-primary {
+  width: 600px; height: 600px;
+  top: -200px; left: -100px;
+  background: radial-gradient(ellipse, var(--accent) 0%, transparent 70%);
+  animation-delay: 0s;
+}
+.aurora-secondary {
+  width: 500px; height: 500px;
+  top: 10%; right: -150px;
+  background: radial-gradient(ellipse, var(--accent-2) 0%, transparent 70%);
+  animation-delay: -7s;
+  opacity: 0.1;
+}
+.aurora-third {
+  width: 400px; height: 400px;
+  bottom: 10%; left: 30%;
+  background: radial-gradient(ellipse, var(--accent) 0%, transparent 70%);
+  animation-delay: -13s;
+  opacity: 0.08;
+}
+@keyframes aurora-drift {
+  0%,100% { transform: translate(0,0) scale(1); }
+  33%      { transform: translate(30px,-20px) scale(1.05); }
+  66%      { transform: translate(-20px,30px) scale(0.97); }
+}
+
+.grain {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-size: 200px;
+}
+
+/* ── Utility classes ─────────────────────────────────────────── */
+.glass {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+.glass-strong {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+.card-hover {
+  transition: transform 200ms cubic-bezier(0.23,1,0.32,1),
+              box-shadow 200ms cubic-bezier(0.23,1,0.32,1);
+}
+.card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.3);
+}
+.btn-press:active { transform: scale(0.97); }
+
+/* ── Per-project themes ──────────────────────────────────────── */
+[data-theme="kwizzo"] {
+  --site-bg: #0c0717;
+  --accent: #7c3aed;
+  --accent-dim: rgba(124,58,237,0.12);
+  --accent-glow: 0 0 40px rgba(124,58,237,0.3);
+  --accent-2: #a855f7;
+}
+[data-theme="tutiq"] {
+  --site-bg: #050e1a;
+  --accent: #0ea5e9;
+  --accent-dim: rgba(14,165,233,0.12);
+  --accent-glow: 0 0 40px rgba(14,165,233,0.3);
+  --accent-2: #38bdf8;
+}
+[data-theme="quizbites"] {
+  --site-bg: #0c0800;
+  --accent: #f59e0b;
+  --accent-dim: rgba(245,158,11,0.12);
+  --accent-glow: 0 0 40px rgba(245,158,11,0.3);
+  --accent-2: #fbbf24;
+}
+[data-theme="quicktech"] {
+  --site-bg: #021007;
+  --accent: #10b981;
+  --accent-dim: rgba(16,185,129,0.12);
+  --accent-glow: 0 0 40px rgba(16,185,129,0.3);
+  --accent-2: #34d399;
+}
+[data-theme="resumevault"] {
+  --site-bg: #030b1e;
+  --accent: #3b82f6;
+  --accent-dim: rgba(59,130,246,0.12);
+  --accent-glow: 0 0 40px rgba(59,130,246,0.25);
+  --accent-2: #93c5fd;
+}
+[data-theme="draftcal"] {
+  --site-bg: #130208;
+  --accent: #e11d48;
+  --accent-dim: rgba(225,29,72,0.12);
+  --accent-glow: 0 0 40px rgba(225,29,72,0.3);
+  --accent-2: #fb7185;
+}
+[data-theme="speakiq"] {
+  --site-bg: #08040f;
+  --accent: #8b5cf6;
+  --accent-dim: rgba(139,92,246,0.12);
+  --accent-glow: 0 0 40px rgba(139,92,246,0.3);
+  --accent-2: #c4b5fd;
+}
+[data-theme="trackwealth"] {
+  --site-bg: #020f07;
+  --accent: #059669;
+  --accent-dim: rgba(5,150,105,0.12);
+  --accent-glow: 0 0 40px rgba(5,150,105,0.25);
+  --accent-2: #34d399;
+}
+[data-theme="roamplan"] {
+  --site-bg: #0d0600;
+  --accent: #f97316;
+  --accent-dim: rgba(249,115,22,0.12);
+  --accent-glow: 0 0 40px rgba(249,115,22,0.3);
+  --accent-2: #fb923c;
+}
+[data-theme="myvitals"] {
+  --site-bg: #010d12;
+  --accent: #06b6d4;
+  --accent-dim: rgba(6,182,212,0.12);
+  --accent-glow: 0 0 40px rgba(6,182,212,0.25);
+  --accent-2: #22d3ee;
+}
+[data-theme="aicoachlab"] {
+  --site-bg: #0a0600;
+  --accent: #d97706;
+  --accent-dim: rgba(217,119,6,0.12);
+  --accent-glow: 0 0 40px rgba(217,119,6,0.3);
+  --accent-2: #fbbf24;
+}
+[data-theme="agenttrace"] {
+  --site-bg: #050a0f;
+  --accent: #00e5ff;
+  --accent-dim: rgba(0,229,255,0.08);
+  --accent-glow: 0 0 40px rgba(0,229,255,0.2);
+  --accent-2: #39ff14;
+}
+[data-theme="worldtrends"] {
+  --site-bg: #0f0905;
+  --accent: #f97316;
+  --accent-dim: rgba(249,115,22,0.12);
+  --accent-glow: 0 0 40px rgba(249,115,22,0.25);
+  --accent-2: #94a3b8;
+}
+[data-theme="anylocal"] {
+  --site-bg: #020d04;
+  --accent: #16a34a;
+  --accent-dim: rgba(22,163,74,0.12);
+  --accent-glow: 0 0 40px rgba(22,163,74,0.25);
+  --accent-2: #4ade80;
+}
+[data-theme="protoforge"] {
+  --site-bg: #0d0209;
+  --accent: #ec4899;
+  --accent-dim: rgba(236,72,153,0.12);
+  --accent-glow: 0 0 40px rgba(236,72,153,0.3);
+  --accent-2: #f472b6;
+}
+[data-theme="flighttracker"] {
+  --site-bg: #020613;
+  --accent: #3b82f6;
+  --accent-dim: rgba(59,130,246,0.12);
+  --accent-glow: 0 0 40px rgba(59,130,246,0.25);
+  --accent-2: #60a5fa;
+}
+[data-theme="neuralos"] {
+  --site-bg: #06020e;
+  --accent: #a855f7;
+  --accent-dim: rgba(168,85,247,0.12);
+  --accent-glow: 0 0 40px rgba(168,85,247,0.3);
+  --accent-2: #d8b4fe;
+}
+[data-theme="invoicemint"] {
+  --site-bg: #010c0b;
+  --accent: #0d9488;
+  --accent-dim: rgba(13,148,136,0.12);
+  --accent-glow: 0 0 40px rgba(13,148,136,0.25);
+  --accent-2: #2dd4bf;
+}
+[data-theme="complybuddy"] {
+  --site-bg: #01040e;
+  --accent: #1d4ed8;
+  --accent-dim: rgba(29,78,216,0.12);
+  --accent-glow: 0 0 40px rgba(29,78,216,0.25);
+  --accent-2: #60a5fa;
+}
+
+/* ── Reduced motion ──────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .aurora { animation: none !important; }
+}

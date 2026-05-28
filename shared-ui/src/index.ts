@@ -101,3 +101,39 @@ export { useVoiceRecognition } from './hooks/useVoiceRecognition'
 export { useFingerprint } from './hooks/useFingerprint'
 export { OnboardingModal } from './components/OnboardingModal'
 export type { OnboardingModalProps, OnboardingStep } from './components/OnboardingModal'
+
+// ── Global layout shell (Wave 5) ─────────────────────────────────────
+// Central wrapper: Navbar + aurora + grain + Footer + Feedback + Chatbot
+export { SiteShell } from './ui/SiteShell'
+export type { SiteShellProps } from './ui/SiteShell'
+
+// Navbar: glass sticky, burger on mobile, accent-aware
+export { Navbar } from './layout/Navbar'
+export type { NavbarProps, NavLink } from './layout/Navbar'
+
+// Footer: columns, description, AdSense-ready content
+export { default as SiteFooter } from './layout/Footer'
+export type { FooterProps, FooterColumn, FooterLink } from './layout/Footer'
+
+// ── AI hooks (client-side) ───────────────────────────────────────────
+// useAI: calls /api/chat, tracks free quota, handles gated response
+export { useAI } from './lib/useAI'
+export type { UseAIOptions, UseAIReturn } from './lib/useAI'
+
+// ── Competitor comparison ────────────────────────────────────────────
+// CompareTable: data-driven, no fake data, scrollable mobile
+export { CompareTable } from './ui/CompareTable'
+export type { CompareTableProps, CompareFeature } from './ui/CompareTable'
+
+// ── Live visitor stats ───────────────────────────────────────────────
+// LiveBadge: real VPS visitor count, hideIfZero=true (no fake data)
+export { LiveBadge } from './ui/LiveBadge'
+
+// getSiteStats: fetch from VPS tracker — server-side only
+// import { getSiteStats } from '@infosiva/shared-ui/lib/analytics'
+export type { SiteStats } from './lib/analytics'
+
+// ── Server-side route factories ──────────────────────────────────────
+// createFeedbackRoute: shared POST /api/feedback handler, rate limited 5/min
+// import { createFeedbackRoute } from '@infosiva/shared-ui/lib/createFeedbackRoute'
+// (server-side only — do NOT import in client components)

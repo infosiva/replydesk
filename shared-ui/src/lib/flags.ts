@@ -23,6 +23,10 @@ export interface SiteFlags {
   freemium: boolean
   waitlist: boolean
   banner: boolean
+  /** Show feedback widget (default true — always collect signal) */
+  feedback: boolean
+  /** Show comparison table section */
+  compare: boolean
 }
 
 const DEFAULTS: SiteFlags = {
@@ -31,6 +35,8 @@ const DEFAULTS: SiteFlags = {
   freemium: true,
   waitlist: false,
   banner: false,
+  feedback: true,
+  compare: false,
 }
 
 const FLAG_KEYS = Object.keys(DEFAULTS) as (keyof SiteFlags)[]
@@ -59,7 +65,7 @@ export async function getSiteFlags(siteId: string): Promise<SiteFlags> {
     const res = await fetch(`${url}/items?${params}`, {
       headers: { accept: "application/json" },
       next: { revalidate: 0 },
-    })
+    } as RequestInit)
 
     if (!res.ok) return { ...DEFAULTS }
 
