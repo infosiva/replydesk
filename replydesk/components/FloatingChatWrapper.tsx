@@ -12,7 +12,7 @@ export default function FloatingChatWrapper() {
   const [open, setOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [msgs, setMsgs] = useState<{ role: 'user' | 'bot'; text: string }[]>([
-    { role: 'bot', text: 'Hi! Ask me about customer support automation or managing tickets 💬' },
+    { role: 'bot', text: 'Hi! ReplyDesk resolves support tickets end-to-end — no human queue, no per-seat pricing. Ask me how it works for your team.' },
   ])
   const [input, setInput] = useState('')
 

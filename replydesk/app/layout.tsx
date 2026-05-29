@@ -8,12 +8,12 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://switchboard-ai.vercel.app"),
-  title: "ReplyDesk — AI Front Desk & Customer Support",
-  description: "Your AI front desk answers calls, replies to emails, and handles customer support 24/7. Never sleeps, always professional.",
+  title: "ReplyDesk — AI Support That Resolves, Not Just Routes",
+  description: "ReplyDesk resolves support tickets end-to-end — no human queue, no per-seat pricing. Autonomous AI that closes tickets, not just triages them.",
   keywords: ["AI customer support", "virtual receptionist", "automated helpdesk", "business automation"],
   openGraph: {
-    title: "ReplyDesk — AI Front Desk & Customer Support",
-    description: "24/7 AI-powered customer support and reception handling",
+    title: "ReplyDesk — AI Support That Resolves, Not Just Routes",
+    description: "Autonomous AI that closes support tickets end-to-end, no human queue.",
     type: "website",
   },
 };
